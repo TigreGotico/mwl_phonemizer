@@ -53,10 +53,10 @@ Despite there being a singular writing system for mirandese, there is one aspect
 
 /s̺/ and /z̺/ indicate apico-alveolar sibilants (as in modern Catalan, northern/central peninsular Spanish and coastal northern European Portuguese), while /s̻/ and /z̻/ are dentalized laminal alveolar sibilants (as in most modern Portuguese, French and English). The unrelated Basque language also maintains a distinction between /s̺/ and /s̻/ (Basque has no voiced sibilants), which suggests that the distinction originally was an areal feature across Iberia.
 
-Portuguese spelling still distinguishes all seven and is identical to Mirandese spelling in this respect, but in pronunciation, Portuguese has reduced them to four /s, z, ʃ, ʒ/ except in northern hinterland European Portuguese dialects, including those of the area that Mirandese is spoken. Northern/central Peninsular Spanish has also reduced them to four but in quite a different way: /t͡ʃ, θ, s̺, x/. Western Andalusian Spanish and Latin American Spanish have further reduced them to three: /t͡ʃ, s̻, x/.
+Portuguese spelling still distinguishes all seven and is identical to Mirandese spelling in this respect, but in pronunciation, Portuguese has reduced them to four /s, z, ʃ, ʒ/ except in northern hinterland European Portuguese dialects, including those of the area that Mirandese is spoken. Northern/central Peninsular Spanish has also reduced them to four but in quite a different way: /tʃ, θ, s̺, x/. Western Andalusian Spanish and Latin American Spanish have further reduced them to three: /tʃ, s̻, x/.
 
 - Retention of the initial /f/ from Latin, like nearly all dialects of Western Romance (the major maverick being Spanish, where /f/> /h/ > ∅).
-- As in Leonese and Galician-Portuguese, the Latin initial consonant clusters /pl/, /kl/, /fl/ evolve into /t͡ʃ/.
+- As in Leonese and Galician-Portuguese, the Latin initial consonant clusters /pl/, /kl/, /fl/ evolve into /tʃ/.
 - Proto-Romance medial clusters -ly- and -cl- became medial /ʎ/.
 - The cluster /-mb-/ is kept.
 - Proto-Romance -mn- becomes /m/: lūm'nem > lume.
@@ -69,7 +69,7 @@ Portuguese spelling still distinguishes all seven and is identical to Mirandese 
 
 # Consonants
 
-- the laminal dental sibilants correspond to Portuguese /s, z/. These are spelled c/ç and z. The corresponding alveolar sibilants are apical and are spelled s(s) and s. Furthermore, there is an additional palatal affricate /t͡ʃ/ ch that is distinct from the fricative /ʃ/, spelled x. The voiced /ʒ/ is spelled j or g, as in Portuguese. Standard Portuguese has reduced all those sounds to just four fricatives: /s, z, ʃ, ʒ/.
+- the laminal dental sibilants correspond to Portuguese /s, z/. These are spelled c/ç and z. The corresponding alveolar sibilants are apical and are spelled s(s) and s. Furthermore, there is an additional palatal affricate /tʃ/ ch that is distinct from the fricative /ʃ/, spelled x. The voiced /ʒ/ is spelled j or g, as in Portuguese. Standard Portuguese has reduced all those sounds to just four fricatives: /s, z, ʃ, ʒ/.
 - The "hard" or "long" R is an alveolar trill /r/, as in other varieties of Astur-Leonese and Spanish. The Portuguese uvular fricative [ʁ] is not found in Mirandese. The "soft" or "short" R is an ordinary alveolar tap [ɾ] commonly found in the Iberian Peninsula. As in other languages spoken in the region, the two contrast only in the word-internal position.
 - Voiced stops /b, d, ɡ/ can be lenited as fricatives [β, ð, ɣ].
 
@@ -100,7 +100,7 @@ MWL_ALPHABET_MAP = {
     "b": ["b", "β"],  # - b = [β] between vowels and after voiced consonants
     "c": ["k", "s̻", "s", "z"],  # - c = [s̻] before e or i, [k] elsewhere
     "ç": ["z̻"],  # - ç = [z̻] before words starting with voiced consonants
-    "ch": ["t͡ʃ"],
+    "ch": ["tʃ"],
     "d": ["d", "ð"],  # - d = [ð] between vowels and after r
     "e": ["e", "ɛ", "ɨ", "ɨ̃"],  # - e = [ɨ/ɨ̃] before stressed syllables
     "en": ["ẽŋ", "ɨ̃"],
@@ -155,9 +155,9 @@ MWL_ALPHABET_MAP = {
     "z": ["z"],
     # --- Added for improvements ---
     "mn": ["m"],  # Proto-Romance -mn- becomes /m/
-    "pl": ["t͡ʃ"], # Latin initial consonant cluster
-    "kl": ["t͡ʃ"], # Latin initial consonant cluster
-    "fl": ["t͡ʃ"], # Latin initial consonant cluster
+    "pl": ["tʃ"], # Latin initial consonant cluster
+    "kl": ["tʃ"], # Latin initial consonant cluster
+    "fl": ["tʃ"], # Latin initial consonant cluster
     "ly": ["ʎ"], # Proto-Romance medial cluster -ly- (handled as a special grapheme)
     "cl": ["ʎ"], # Proto-Romance medial cluster -cl- (handled as a special grapheme)
     "ll": ["ʎ"], # Palatalization of double l
@@ -181,11 +181,11 @@ CENTRAL_DICT = {
     "alternatibo": "al.tɨɾ.nɐˈti.bu",
     "amarielho": "ɐ.mɐˈɾjɛ.ʎu",
     "ambesible": "ɐ̃.bɨˈs̺i.blɨ",
-    "amouchado": "amowˈt͡ʃaðu",
+    "amouchado": "amowˈtʃaðu",
     "amportante": "ɐ̃.puɾˈtɐ̃.tɨ",
     "ampossible": "ɐ̃.puˈsi.blɨ",
     "ampressionante": "ɐ̃.pɾɨ.sjuˈnɐ̃.tɨ",
-    "anchir": "ɐ̃.ˈt͡ʃiɾ",
+    "anchir": "ɐ̃.ˈtʃiɾ",
     "antender": "ɐ̃.tɨ̃.ˈdeɾ",
     "arena": "ɐˈɾenɐ",
     "açpuis": "ɐsˈpujs̺",
@@ -203,8 +203,8 @@ CENTRAL_DICT = {
     "bíblico": "bi.bli.ku",
     "cabresto": "kɐˈbɾeʃ.tu",
     "canhona": "kɐˈɲo.nɐ",
-    "cheno": "ˈt͡ʃe.nu",
-    "chober": "t͡ʃuˈβeɾ",
+    "cheno": "ˈtʃe.nu",
+    "chober": "tʃuˈβeɾ",
     "ciguonha": "s̻i.ˈɣwo.ɲɐ",
     "cul": "kul",
     "dafeito": "ðɐˈfej.tʊ",
@@ -668,11 +668,11 @@ if __name__ == "__main__":
     #     L furdes ber, talbéç que stéia muôrto!
     # Phonemized: kiẽŋ diɾiɛ k'ɐ̃ŋtɾɛ ʎs̺ matɔs̺ ejɾiz̻aðɔs̺
     #     ʎas̺ owrjetas̺ i ʎs̺ rriws̺ d'ɛs̺ta tjera,
-    #     biβiɛ, kumɔ ʎ t͡ʃauɣaɾz̻ɔ dɛ ʎa s̺jera,
+    #     biβiɛ, kumɔ ʎ tʃauɣaɾz̻ɔ dɛ ʎa s̺jera,
     #     wa ʎɛ~ga dɛ s̺õŋs̺ tɐ̃ŋ baɾjaðɔs̺?
     #
     #     mɔs̺tɾɛ-s̺ɛ i falɛ-s̺' ɛs̺a ʎɛ~ga fiʎa
-    #     d'ũŋ pɔβɔ kɛ tẽŋ nejʎa ʎ t͡ʃɔɾɔ i ʎ kɐ̃ŋtɔ!
+    #     d'ũŋ pɔβɔ kɛ tẽŋ nejʎa ʎ tʃɔɾɔ i ʎ kɐ̃ŋtɔ!
     #     naða pɔɾ s̻jeɾtɔ mɔs̺ kautiβa tɐ̃ŋtɔ
     #     kumɔ ʎa fɔɾm' ɐ̃ŋ kɛ ʎ'ejðeja bɾiʎa.
     #
