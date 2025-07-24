@@ -69,7 +69,7 @@ Portuguese spelling still distinguishes all seven and is identical to Mirandese 
 
 # Consonants
 
-- the laminal dental sibilants correspond to Portuguese /s, z/. These are spelled c/ç and z. The corresponding alveolar sibilants are apical and are spelled s(s) and s. Furthermore, there is an additional palatal affricate /tʃ/ ch that is distinct from the fricative /ʃ/, spelled x. The voiced /ʒ/ is spelled j or g, as in Portuguese. Standard Portuguese has reduced all those sounds to just four fricatives: /s, z, ʃ, ʒ/.
+- the laminal dental sibilants correspond to Portuguese /s, z/. These are spelled c/ç and z. The corresponding alveolar sibilants are apical and are spelled s(s) and s. Furthermore, there is an additional palatal affricate /t͡ʃ/ ch that is distinct from the fricative /ʃ/, spelled x. The voiced /ʒ/ is spelled j or g, as in Portuguese. Standard Portuguese has reduced all those sounds to just four fricatives: /s, z, ʃ, ʒ/.
 - The "hard" or "long" R is an alveolar trill /r/, as in other varieties of Astur-Leonese and Spanish. The Portuguese uvular fricative [ʁ] is not found in Mirandese. The "soft" or "short" R is an ordinary alveolar tap [ɾ] commonly found in the Iberian Peninsula. As in other languages spoken in the region, the two contrast only in the word-internal position.
 - Voiced stops /b, d, ɡ/ can be lenited as fricatives [β, ð, ɣ].
 
@@ -100,7 +100,7 @@ MWL_ALPHABET_MAP = {
     "b": ["b", "β"],  # - b = [β] between vowels and after voiced consonants
     "c": ["k", "s̻", "s", "z"],  # - c = [s̻] before e or i, [k] elsewhere
     "ç": ["z̻"],  # - ç = [z̻] before words starting with voiced consonants
-    "ch": ["tʃ"],
+    "ch": ["t͡ʃ"],
     "d": ["d", "ð"],  # - d = [ð] between vowels and after r
     "e": ["e", "ɛ", "ɨ", "ɨ̃"],  # - e = [ɨ/ɨ̃] before stressed syllables
     "en": ["ẽŋ", "ɨ̃"],
@@ -155,9 +155,9 @@ MWL_ALPHABET_MAP = {
     "z": ["z"],
     # --- Added for improvements ---
     "mn": ["m"],  # Proto-Romance -mn- becomes /m/
-    "pl": ["tʃ"], # Latin initial consonant cluster
-    "kl": ["tʃ"], # Latin initial consonant cluster
-    "fl": ["tʃ"], # Latin initial consonant cluster
+    "pl": ["t͡ʃ"], # Latin initial consonant cluster
+    "kl": ["t͡ʃ"], # Latin initial consonant cluster
+    "fl": ["t͡ʃ"], # Latin initial consonant cluster
     "ly": ["ʎ"], # Proto-Romance medial cluster -ly- (handled as a special grapheme)
     "cl": ["ʎ"], # Proto-Romance medial cluster -cl- (handled as a special grapheme)
     "ll": ["ʎ"], # Palatalization of double l
@@ -165,24 +165,170 @@ MWL_ALPHABET_MAP = {
 }
 
 # direct word look ups
+# https://en.wiktionary.org/wiki/Category:Mirandese_terms_with_IPA_pronunciation
 CENTRAL_DICT = {
     "hai": "aj",
     "más": "mas̺",
     "mais": "majs̺",
-    "fuogo": "fwo.ɣʊ",
     "alhá": "ɐˈʎa",
-    "i": "i",
-    "ye": "je",
     "deimingo": "dejˈmĩ.gʊ",
+    "abandono": "a.bɐ̃ˈdo.nu",
+    "adbertido": "ɐ.dbɨɾˈti.du",
+    "adulto": "ɐˈdul.tu",
+    "afamado": "ɐ.fɐˈma.du",
+    "afeito": "ɐˈfej.tʊ",
+    "afelhado": "ɐ.fɨˈʎa.du",
+    "alternatibo": "al.tɨɾ.nɐˈti.bu",
+    "amarielho": "ɐ.mɐˈɾjɛ.ʎu",
+    "ambesible": "ɐ̃.bɨˈs̺i.blɨ",
+    "amouchado": "amowˈt͡ʃaðu",
+    "amportante": "ɐ̃.puɾˈtɐ̃.tɨ",
+    "ampossible": "ɐ̃.puˈsi.blɨ",
+    "ampressionante": "ɐ̃.pɾɨ.sjuˈnɐ̃.tɨ",
+    "anchir": "ɐ̃.ˈt͡ʃiɾ",
+    "antender": "ɐ̃.tɨ̃.ˈdeɾ",
+    "arena": "ɐˈɾenɐ",
+    "açpuis": "ɐsˈpujs̺",
+    "berde": "ˈveɾ.dɨ",
+    "besible": "bɨˈz̺i.blɨ",
+    "bexanar": "bɨ.ʃɐ.ˈnaɾ",
+    "bibal": "bi.ˈβaɫ",
+    "bielho": "bjɛʎu",
+    "biolento": "bjuˈlẽ.tu",
+    "biúba": "biˈuβɐ",
+    "brabo": "bɾa.bu",
+    "branco": "bɾɐ̃.ku",
+    "buono": "bwo.nu",
+    "burmeilho": "buɾˈmɐj.ʎu",
+    "bíblico": "bi.bli.ku",
+    "cabresto": "kɐˈbɾeʃ.tu",
+    "canhona": "kɐˈɲo.nɐ",
+    "cheno": "ˈt͡ʃe.nu",
+    "chober": "t͡ʃuˈβeɾ",
+    "ciguonha": "s̻i.ˈɣwo.ɲɐ",
+    "cul": "kul",
+    "dafeito": "ðɐˈfej.tʊ",
+    "defrente": "dɨˈfɾẽ.tɨ",
+    "defícel": "dɨˈfi.sɛl",
+    "drento": "ˈdɾẽtu",
+    "eigual": "ɐjˈɡwal",
+    "era": "ˈɛ.ɾɐ",
+    "eras": "ˈɛ.ɾɐs̺",
+    "feliç": "fɨˈlis̻",
+    "fierro": "ˈfjɛ.ru",
+    "francesa": "fɾɐ̃ˈsɛ.zɐ",
+    "francesas": "fɾɐ̃ˈsɛ.zɐs̺",
+    "franceses": "fɾɐ̃ˈsɛ.zɨs̺",
+    "francés": "fɾɐ̃ˈsɛs̺",
+    "fui": "fuj",
+    "fumos": "ˈfu.mus̺",
+    "fuogo": "fwo.ɣʊ",
+    "fuonte": "ˈfwõ.tɨ",
+    "fuorte": "ˈfwɔɾ.tɨ",
+    "fuortemente": "fwɔɾ.tɨˈmẽ.tɨ",
+    "fuorça": "ˈfwɔɾ.s̻ɐ",
+    "fuste": "ˈfus̺.tɨ",
+    "fácele": "ˈfa.sɨ.lɨ",
+    "guapo": "ˈɡwa.pu",
+    "haber": "ɐˈβeɾ",
+    "houmano": "o(w)ˈmɐ.nu",
+    "i": "i",
+    "l": "l̩",
+    "lhabrar": "ʎɐˈbɾaɾ(i)",
+    "lhimpo": "ˈʎĩ.pʊ",
+    "lhobo": "ˈʎo.bʊ",
+    "lhuç": "ˈʎus̻",
+    "lhéngua": "ˈʎɛ̃ɡwɐ",
+    "luç": "ˈʎus̻",
+    "macado": "mɐˈka.du",
+    "maias": "ˈmajɐs̺",
+    "mirandés": "mi.ɾɐ̃ˈdes̺",
+    "molineiro": "mʊ.li.ˈnei̯.rʊ",
+    "molino": "muˈlinu",
+    "muola": "ˈmu̯olɐ",
+    "ne l": "nɨl",
+    "neçairo": "nɨˈsaj.ɾu",
+    "nuobo": "ˈnwo.βʊ",
+    "nó": "ˈnɔ",
+    "onte": "ˈõ.tɨ",
+    "oucidental": "ow.s̻i.dẽˈtal",
+    "oufecialmente": "o(w).fɨˌsjalˈmẽ.tɨ",
+    "ourdenhar": "ou̯ɾdɨˈɲaɾ",
+    "oureginal": "ow.ɾɨ.ʒiˈnal",
+    "ourganizaçon": "ou̯r.ɡɐ.ni.zɐ.ˈsõ",
+    "ouropeu": "ow.ɾuˈpew",
+    "ourriêta": "ˈowrjetɐ",
+    "paxarina": "pɐʃɐˈɾinɐ",
+    "pequeinho": "pɨˈkɐi.ɲu",
+    "piranha": "piˈra.ɲɐ",
+    "puis": "ˈpujs̺",
+    "pul": "ˈpul",
+    "puorta": "ˈpwoɾtɐ",
+    "purmeiro": "puɾˈmɐj.ɾu",
+    "quaije": "ˈkwaj.ʒɨ",
+    "quando": "ˈkwɐ̃.du",
+    "quelobrinas": "kɨluˈbrinas̺",
+    "quemun": "kɨˈmun",
+    "rabielho": "rɐ.ˈβje.ʎu",
+    "rico": "ˈri.ku",
+    "salir": "s̺ɐˈliɾ",
+    "screbir": "s̺krɨˈβiɾ",
+    "segar": "s̺ɨˈɣaɾ",
+    "sendo": "ˈsẽ.du",
+    "ser": "ˈseɾ",
+    "sida": "ˈsi.dɐ",
+    "sidas": "ˈsi.dɐs̺",
+    "sido": "ˈsi.du",
+    "sidos": "ˈsi.dus̺",
+    "simple": "ˈs̺ĩ.plɨ",
+    "sobrino": "s̺uˈbɾinu",
+    "sodes": "ˈso.dɨs̺",
+    "somos": "ˈso.mus̺",
+    "son": "ˈsõ",
+    "sou": "ˈso(w)",
+    "spanha": "ˈs̺pɐ.ɲɐ",
+    "squierdo": "ˈs̺kjeɾ.du",
+    "sós": "ˈs̺ɔs̺",
+    "talbeç": "talˈbes",
+    "tamien": "tɐˈmjẽ",
+    "tascar": "tɐs̺.ˈkaɾ",
+    "tener": "tɨˈneɾ",
+    "trasdonte": "ˈtɾɐz̺dõtɨ",
+    "trasdontonte": "ˈtɾɐz̺dõtõtɨ",
+    "ye": "ˈje",
+    "you": "jow",
+    "yê": "ˈje",
+    "zastre": "ˈzas̺tɾɨ",
+    "zeigual": "zɐjˈɡwal",
+    "zenhar": "zɨˈɲaɾ",
+    "áfrica": "ˈafɾikɐ",
+    "çcansar": "skɐ̃ˈs̺aɾ",
+    "çcrebir": "skɾɨˈβiɾ",
+    "çcriçon": "skɾiˈsõ",
+    "çtinto": "ˈstĩ.tu",
+    "érades": "ˈɛ.ɾɐ.dɨs̺",
+    "éramos": "ˈɛ.ɾɐ.mus̺",
+    "éran": "ˈɛ.ɾɐn",
+    "ũ": "ˈũ",
+    "ũa": "ˈũ.ŋɐ",
+    "ua": "ˈũ.ŋɐ"
 }
 RAIANO_DICT = {
     "fuogo": "fwo.ʊ",
+    "l": "ɐl",
 }
 SENDINESE_DICT = {
     "fuogo": "fu.ɣʊ",
     "alhá": "ɐˈla",
-    "ye": "(j)i",
+    "ye": "(ˈj)i",
     "deimingo": "dɨˈmʊ̃j̃.gʊ",
+    "demingo": "dɨˈmʊ̃j̃.gʊ",
+    "l": "lʊ",
+    "lhobo": "ˈlo.bʊ",
+    "lhuç": "ˈlus̻",
+    "luç": "ˈlus̻",
+    "puorta": "ˈpuɾtɐ",
+    "yê": "ˈji",
 }
 
 _vowels = "aeiouáéíóúäɐɛɨɪɔʊ"  # Extended set of vowels for context checking
@@ -465,6 +611,7 @@ def mirandese_phonemizer(text, dialect="central", word_lookup=True, keep_optiona
         keep_optional_phones (bool): If True, keeps optional phonemes in parentheses. If False, removes them.
         keep_stress_marks (bool): If True, keeps stress marks and syllable dots. If False, removes them.
     """
+    text = text.replace("-", " ")
     words = re.findall(r"\b\w+\b|[\W_]+", text)  # Split by words and keep punctuation/spaces
     phonemized_parts = []
     for word_or_punc in words:
@@ -521,11 +668,11 @@ if __name__ == "__main__":
     #     L furdes ber, talbéç que stéia muôrto!
     # Phonemized: kiẽŋ diɾiɛ k'ɐ̃ŋtɾɛ ʎs̺ matɔs̺ ejɾiz̻aðɔs̺
     #     ʎas̺ owrjetas̺ i ʎs̺ rriws̺ d'ɛs̺ta tjera,
-    #     biβiɛ, kumɔ ʎ tʃauɣaɾz̻ɔ dɛ ʎa s̺jera,
+    #     biβiɛ, kumɔ ʎ t͡ʃauɣaɾz̻ɔ dɛ ʎa s̺jera,
     #     wa ʎɛ~ga dɛ s̺õŋs̺ tɐ̃ŋ baɾjaðɔs̺?
     #
     #     mɔs̺tɾɛ-s̺ɛ i falɛ-s̺' ɛs̺a ʎɛ~ga fiʎa
-    #     d'ũŋ pɔβɔ kɛ tẽŋ nejʎa ʎ tʃɔɾɔ i ʎ kɐ̃ŋtɔ!
+    #     d'ũŋ pɔβɔ kɛ tẽŋ nejʎa ʎ t͡ʃɔɾɔ i ʎ kɐ̃ŋtɔ!
     #     naða pɔɾ s̻jeɾtɔ mɔs̺ kautiβa tɐ̃ŋtɔ
     #     kumɔ ʎa fɔɾm' ɐ̃ŋ kɛ ʎ'ejðeja bɾiʎa.
     #
