@@ -1,5 +1,8 @@
+import json
+import os.path
 import re
 import string
+
 """
 reference phonetic info from wikipedia:
 
@@ -90,246 +93,20 @@ As in Portuguese, Mirandese still uses the following synthetic tenses:
 
 """
 
+base = os.path.dirname(__file__)
 
 # Mapping to convert graphemes to phonemes
-MWL_ALPHABET_MAP = {
-    "a": ["a", "ä", "ɐ"],
-    "á": ["ɐ̃", "a", ],
-    "ai": ["aj"],
-    "an": ["ɐ̃ŋ"],
-    "b": ["b", "β"],  # - b = [β] between vowels and after voiced consonants
-    "c": ["k", "s̻", "s", "z"],  # - c = [s̻] before e or i, [k] elsewhere
-    "ç": ["z̻"],  # - ç = [z̻] before words starting with voiced consonants
-    "ch": ["tʃ"],
-    "d": ["d", "ð"],  # - d = [ð] between vowels and after r
-    "e": ["e", "ɛ", "ɨ", "ɨ̃"],  # - e = [ɨ/ɨ̃] before stressed syllables
-    "en": ["ẽŋ", "ɨ̃"],
-    "é": ["ɛ"],
-    "ei": ["ej"],
-    "eu": ["ew"],
-    "éu": ["ɛw"],
-    "f": ["f"],
-    "g": ["g", "ɣ", "ʒ", "ɡu", "gu̯"],
-    # - g = [ɣ] between vowels and after r. Before e and i, g = [ʒ]. g = [ɡu] in certain words, such as guira, guiron and guirica. g = [gu̯] before a
-    "gu": ["g", "gu", "ɣ"],  # - gu = [ɣ] between vowels and after r
-    "h": [""],  # silent
-    "i": ["i", "j"],
-    "in": ["ĩŋ", "ɨ̃j̃"],  # ɨ̃j̃ (Sendinese dialect)
-    "í": ["i"],
-    "ia": ["ja"],
-    "iê": ["je", "jê"],
-    "iu": ["iw"],
-    "j": ["ʒ"],
-    "k": ["k"],  # - k is only used in loanwords from other languages
-    "l": ["l", "ʎ", "ɫ"],  # - l = [ʎ] at the beginning of words, and [l] elsewhere
-    "lh": ["ʎ"],
-    "m": ["m"],  # - m is silent before nasalized front vowels, e.g. amportante
-    "n": ["n", "ŋ"], # - n is silent before consonants and at the end of words before nasalized front vowels, e.g. lhéngua, sons, quien
-    "nh": ["ɲ"],
-    "o": ["ɔ", "o", "u", "ʊ"],  # - o = [u] when unstressed
-    "on": ["õŋ"],
-    "ó": ["ɔ"],
-    "oi": ["oj"],
-    "ói": ["ɔj"],
-    "ou": ["ow"],
-    "p": ["p"],
-    "q": ["k"],
-    "qu": ["k", "kṷ"],  # - qu = [k] before e and i, and [kṷ] before a and en
-    "r": ["ɾ", "r", "rr"],  # - r = [rr] at the beginning of words and after n
-    "rr": ["r"],
-    "s": ["s̺", "z̺"],
-    # - s = [s̺] when in initial position and before silent consonants. Between vowels and before voiced consonants, s = [z̺]
-    "ss": ["s̺"],
-    "t": ["t"],
-    "u": ["u", "w", "ũ"],
-    "un": ["ũŋ", "ʊ̃ŋ"],
-    "ú": ["u"],
-    "ũ": ["ũ"],
-    "ua": ["wa"],
-    "ui": ["uj"],
-    "uo": ["wo", "u"],
-    "v": ["b", "v"],  # - v is only used in loanwords from other languages
-    "w": ["w", "b", "β"],  # - w is only used in loanwords from other languages
-    "x": ["ʃ"],
-    "y": ["j"],
-    "z": ["z"],
-    # --- Added for improvements ---
-    "mn": ["m"],  # Proto-Romance -mn- becomes /m/
-    "pl": ["tʃ"], # Latin initial consonant cluster
-    "kl": ["tʃ"], # Latin initial consonant cluster
-    "fl": ["tʃ"], # Latin initial consonant cluster
-    "ly": ["ʎ"], # Proto-Romance medial cluster -ly- (handled as a special grapheme)
-    "cl": ["ʎ"], # Proto-Romance medial cluster -cl- (handled as a special grapheme)
-    "ll": ["ʎ"], # Palatalization of double l
-    "nn": ["ɲ"], # Palatalization of double n
-}
+with open(os.path.join(base, "g2p.json")) as f:
+    MWL_ALPHABET_MAP = json.load(f)
 
 # direct word look ups
 # https://en.wiktionary.org/wiki/Category:Mirandese_terms_with_IPA_pronunciation
-CENTRAL_DICT = {
-    "hai": "aj",
-    "más": "mas̺",
-    "mais": "majs̺",
-    "alhá": "ɐˈʎa",
-    "deimingo": "dejˈmĩ.gʊ",
-    "abandono": "a.bɐ̃ˈdo.nu",
-    "adbertido": "ɐ.dbɨɾˈti.du",
-    "adulto": "ɐˈdul.tu",
-    "afamado": "ɐ.fɐˈma.du",
-    "afeito": "ɐˈfej.tʊ",
-    "afelhado": "ɐ.fɨˈʎa.du",
-    "alternatibo": "al.tɨɾ.nɐˈti.bu",
-    "amarielho": "ɐ.mɐˈɾjɛ.ʎu",
-    "ambesible": "ɐ̃.bɨˈs̺i.blɨ",
-    "amouchado": "amowˈtʃaðu",
-    "amportante": "ɐ̃.puɾˈtɐ̃.tɨ",
-    "ampossible": "ɐ̃.puˈsi.blɨ",
-    "ampressionante": "ɐ̃.pɾɨ.sjuˈnɐ̃.tɨ",
-    "anchir": "ɐ̃.ˈtʃiɾ",
-    "antender": "ɐ̃.tɨ̃.ˈdeɾ",
-    "arena": "ɐˈɾenɐ",
-    "açpuis": "ɐsˈpujs̺",
-    "berde": "ˈveɾ.dɨ",
-    "besible": "bɨˈz̺i.blɨ",
-    "bexanar": "bɨ.ʃɐ.ˈnaɾ",
-    "bibal": "bi.ˈβaɫ",
-    "bielho": "bjɛʎu",
-    "biolento": "bjuˈlẽ.tu",
-    "biúba": "biˈuβɐ",
-    "brabo": "bɾa.bu",
-    "branco": "bɾɐ̃.ku",
-    "buono": "bwo.nu",
-    "burmeilho": "buɾˈmɐj.ʎu",
-    "bíblico": "bi.bli.ku",
-    "cabresto": "kɐˈbɾeʃ.tu",
-    "canhona": "kɐˈɲo.nɐ",
-    "cheno": "ˈtʃe.nu",
-    "chober": "tʃuˈβeɾ",
-    "ciguonha": "s̻i.ˈɣwo.ɲɐ",
-    "cul": "kul",
-    "dafeito": "ðɐˈfej.tʊ",
-    "defrente": "dɨˈfɾẽ.tɨ",
-    "defícel": "dɨˈfi.sɛl",
-    "drento": "ˈdɾẽtu",
-    "eigual": "ɐjˈɡwal",
-    "era": "ˈɛ.ɾɐ",
-    "eras": "ˈɛ.ɾɐs̺",
-    "feliç": "fɨˈlis̻",
-    "fierro": "ˈfjɛ.ru",
-    "francesa": "fɾɐ̃ˈsɛ.zɐ",
-    "francesas": "fɾɐ̃ˈsɛ.zɐs̺",
-    "franceses": "fɾɐ̃ˈsɛ.zɨs̺",
-    "francés": "fɾɐ̃ˈsɛs̺",
-    "fui": "fuj",
-    "fumos": "ˈfu.mus̺",
-    "fuogo": "fwo.ɣʊ",
-    "fuonte": "ˈfwõ.tɨ",
-    "fuorte": "ˈfwɔɾ.tɨ",
-    "fuortemente": "fwɔɾ.tɨˈmẽ.tɨ",
-    "fuorça": "ˈfwɔɾ.s̻ɐ",
-    "fuste": "ˈfus̺.tɨ",
-    "fácele": "ˈfa.sɨ.lɨ",
-    "guapo": "ˈɡwa.pu",
-    "haber": "ɐˈβeɾ",
-    "houmano": "o(w)ˈmɐ.nu",
-    "i": "i",
-    "l": "l̩",
-    "lhabrar": "ʎɐˈbɾaɾ(i)",
-    "lhimpo": "ˈʎĩ.pʊ",
-    "lhobo": "ˈʎo.bʊ",
-    "lhuç": "ˈʎus̻",
-    "lhéngua": "ˈʎɛ̃ɡwɐ",
-    "luç": "ˈʎus̻",
-    "macado": "mɐˈka.du",
-    "maias": "ˈmajɐs̺",
-    "mirandés": "mi.ɾɐ̃ˈdes̺",
-    "molineiro": "mʊ.li.ˈnei̯.rʊ",
-    "molino": "muˈlinu",
-    "muola": "ˈmu̯olɐ",
-    "ne l": "nɨl",
-    "neçairo": "nɨˈsaj.ɾu",
-    "nuobo": "ˈnwo.βʊ",
-    "nó": "ˈnɔ",
-    "onte": "ˈõ.tɨ",
-    "oucidental": "ow.s̻i.dẽˈtal",
-    "oufecialmente": "o(w).fɨˌsjalˈmẽ.tɨ",
-    "ourdenhar": "ou̯ɾdɨˈɲaɾ",
-    "oureginal": "ow.ɾɨ.ʒiˈnal",
-    "ourganizaçon": "ou̯r.ɡɐ.ni.zɐ.ˈsõ",
-    "ouropeu": "ow.ɾuˈpew",
-    "ourriêta": "ˈowrjetɐ",
-    "paxarina": "pɐʃɐˈɾinɐ",
-    "pequeinho": "pɨˈkɐi.ɲu",
-    "piranha": "piˈra.ɲɐ",
-    "puis": "ˈpujs̺",
-    "pul": "ˈpul",
-    "puorta": "ˈpwoɾtɐ",
-    "purmeiro": "puɾˈmɐj.ɾu",
-    "quaije": "ˈkwaj.ʒɨ",
-    "quando": "ˈkwɐ̃.du",
-    "quelobrinas": "kɨluˈbrinas̺",
-    "quemun": "kɨˈmun",
-    "rabielho": "rɐ.ˈβje.ʎu",
-    "rico": "ˈri.ku",
-    "salir": "s̺ɐˈliɾ",
-    "screbir": "s̺krɨˈβiɾ",
-    "segar": "s̺ɨˈɣaɾ",
-    "sendo": "ˈsẽ.du",
-    "ser": "ˈseɾ",
-    "sida": "ˈsi.dɐ",
-    "sidas": "ˈsi.dɐs̺",
-    "sido": "ˈsi.du",
-    "sidos": "ˈsi.dus̺",
-    "simple": "ˈs̺ĩ.plɨ",
-    "sobrino": "s̺uˈbɾinu",
-    "sodes": "ˈso.dɨs̺",
-    "somos": "ˈso.mus̺",
-    "son": "ˈsõ",
-    "sou": "ˈso(w)",
-    "spanha": "ˈs̺pɐ.ɲɐ",
-    "squierdo": "ˈs̺kjeɾ.du",
-    "sós": "ˈs̺ɔs̺",
-    "talbeç": "talˈbes",
-    "tamien": "tɐˈmjẽ",
-    "tascar": "tɐs̺.ˈkaɾ",
-    "tener": "tɨˈneɾ",
-    "trasdonte": "ˈtɾɐz̺dõtɨ",
-    "trasdontonte": "ˈtɾɐz̺dõtõtɨ",
-    "ye": "ˈje",
-    "you": "jow",
-    "yê": "ˈje",
-    "zastre": "ˈzas̺tɾɨ",
-    "zeigual": "zɐjˈɡwal",
-    "zenhar": "zɨˈɲaɾ",
-    "áfrica": "ˈafɾikɐ",
-    "çcansar": "skɐ̃ˈs̺aɾ",
-    "çcrebir": "skɾɨˈβiɾ",
-    "çcriçon": "skɾiˈsõ",
-    "çtinto": "ˈstĩ.tu",
-    "érades": "ˈɛ.ɾɐ.dɨs̺",
-    "éramos": "ˈɛ.ɾɐ.mus̺",
-    "éran": "ˈɛ.ɾɐn",
-    "ũ": "ˈũ",
-    "ũa": "ˈũ.ŋɐ",
-    "ua": "ˈũ.ŋɐ"
-}
-RAIANO_DICT = {
-    "fuogo": "fwo.ʊ",
-    "l": "ɐl",
-}
-SENDINESE_DICT = {
-    "fuogo": "fu.ɣʊ",
-    "alhá": "ɐˈla",
-    "ye": "(ˈj)i",
-    "deimingo": "dɨˈmʊ̃j̃.gʊ",
-    "demingo": "dɨˈmʊ̃j̃.gʊ",
-    "l": "lʊ",
-    "lhobo": "ˈlo.bʊ",
-    "lhuç": "ˈlus̻",
-    "luç": "ˈlus̻",
-    "puorta": "ˈpuɾtɐ",
-    "yê": "ˈji",
-}
+with open(os.path.join(base, "central.json")) as f:
+    CENTRAL_DICT = json.load(f)
+with open(os.path.join(base, "raiano.json")) as f:
+    RAIANO_DICT = json.load(f)
+with open(os.path.join(base, "sendinese.json")) as f:
+    SENDINESE_DICT = json.load(f)
 
 _vowels = "aeiouáéíóúäɐɛɨɪɔʊ"  # Extended set of vowels for context checking
 _voiced_consonants = "bdgjlmnrvz"  # Approximated list of voiced consonants
@@ -346,8 +123,8 @@ def _is_voiced_consonant(char):
 
 
 def _post_process(phonemized: str,
-                   keep_optional_phones=True,
-                   keep_stress_marks=False) -> str:
+                  keep_optional_phones=True,
+                  keep_stress_marks=False) -> str:
     if not keep_stress_marks:
         phonemized = (phonemized.
                       replace("ˈ", "").
@@ -362,6 +139,7 @@ def _post_process(phonemized: str,
         # This regex finds any content within parentheses and replaces the whole match with an empty string
         phonemized = re.sub(r'\([^)]*\)', '', phonemized)
     return phonemized
+
 
 def phonemize_word(word, dialect="central",
                    word_lookup=True,
@@ -512,7 +290,7 @@ def phonemize_word(word, dialect="central",
                         # Rule: n = [ŋ] before k, g, q (velar consonants), otherwise [n].
                         # Nasalization of preceding vowels is handled by AN, EN, IN, ON, UN.
                         if i + 1 < len(word) and word[i + 1].lower() in "kgq":
-                            phonemes.append(MWL_ALPHABET_MAP["n"][1]) # [ŋ]
+                            phonemes.append(MWL_ALPHABET_MAP["n"][1])  # [ŋ]
                         else:
                             phonemes.append(MWL_ALPHABET_MAP["n"][0])  # [n]
                     elif grapheme == "o":
@@ -616,7 +394,8 @@ def mirandese_phonemizer(text, dialect="central", word_lookup=True, keep_optiona
     phonemized_parts = []
     for word_or_punc in words:
         if word_or_punc.isalpha():
-            phonemized_parts.append(phonemize_word(word_or_punc, dialect, word_lookup, keep_optional_phones, keep_stress_marks))
+            phonemized_parts.append(
+                phonemize_word(word_or_punc, dialect, word_lookup, keep_optional_phones, keep_stress_marks))
         else:
             phonemized_parts.append(word_or_punc)  # Keep punctuation and spaces as is
     return "".join(phonemized_parts)
