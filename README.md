@@ -17,8 +17,6 @@ This repository contains a Python-based Mirandese phonemizer, designed to conver
 
 ---
 
------
-
 ## **Usage**
 
 ```python
