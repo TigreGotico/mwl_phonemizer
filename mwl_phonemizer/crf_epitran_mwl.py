@@ -4,12 +4,10 @@ import os
 
 class CRFEpitranCorrector(MirandesePhonemizer):
     def __init__(self, crf_model_path: str | None = None,
-                 manual_fixes: bool = False,
                  *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.crf_model_path = crf_model_path
         self.model = None
-        self.manual_fixes = manual_fixes
         import epitran
         self.epitran = epitran.Epitran("por-Latn")
         if crf_model_path and os.path.exists(crf_model_path):

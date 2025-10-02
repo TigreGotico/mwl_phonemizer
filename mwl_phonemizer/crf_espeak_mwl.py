@@ -5,12 +5,10 @@ import os
 
 class CRFEspeakCorrector(MirandesePhonemizer):
     def __init__(self, crf_model_path: str | None = None,
-                 manual_fixes: bool = False,
                  *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.crf_model_path = crf_model_path
         self.model = None
-        self.manual_fixes = manual_fixes
         self.espeak = _EspeakPhonemizer()
         if crf_model_path and os.path.exists(crf_model_path):
             self.load_model(crf_model_path)
