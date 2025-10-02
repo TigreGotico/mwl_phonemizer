@@ -1,410 +1,15 @@
-import json
-import os.path
-import re
-import string
-
-"""
-reference phonetic info from wikipedia:
-
-# Ortography
-
-Mirandese is written using the Latin alphabet, with a Portuguese basis for orthography due to its political situation:
-
-| [Letters](https://en.wikipedia.org/wiki/Letter_(alphabet) "Letter (alphabet)") and [Dipgraphs](https://en.wikipedia.org/wiki/Digraph_(orthography) "Digraph (orthography)") | Names[[10]](https://en.wikipedia.org/wiki/Mirandese_language#cite_note-CDM-11) | [IPA](https://en.wikipedia.org/wiki/International_Phonetic_Alphabet "International Phonetic Alphabet") |
-| --- | --- | --- |
-| Uppercase | Lowercase |
-| A | a | á | /a/, /ɐ/ |
-| AN | an | - | /ɐ̃(ŋ)/ |
-| B | b | bé | /b/, /β/ |
-| C | c | cé, qué | /k/, /s/ |
-| Ç | ç | cé de cedilha | /s/, /z/ |
-| D | d | dé | /d/, /ð/ |
-| E | e | é | /ɛ/, /e/, /ɨ/ |
-| EN | en | - | /ẽ(ŋ)//ɨ̃/ |
-| F | f | fé | /f/ |
-| G | g | gué | /g/, /ɣ/, /ʒ/ |
-| H| h | hagá | — |
-| I | i | i | /i/, /j/ |
-| IN | in | - | /ĩ(ŋ)/, /ɨ̃j̃/ (Sendinese) |
-| J | j | jé | /ʒ/ |
-| L | l | lé | /l/, /ɫ/ |
-| LH | lh | - | /ʎ/ |
-| M | m | mé | /m/, /~/ |
-| N | n | né | /n/, /~/, /ŋ/ |
-| NH | nh | - | /ɲ/ |
-| O | o | ó | /ɔ/, /o/, /u/, /ʊ/ |
-| ON | on | - | /õ(ŋ)/ |
-| P | p | pé | /p/ |
-| Q | q | qué | /k/ |
-| R | r | ré | /ɾ/, /r/ |
-| RR | rr | - | /r/ |
-| S | s | sé | /s̺/, /z̺/ |
-| SS | s | - | /s̺/ |
-| T | t | té | /t/ |
-| U | u | u | /u/, /w/, /ũ/ |
-| UN | un | - | /ũ(ŋ)/, /ʊ̃(ŋ)/ |
-| X | x | xiç | /ʃ/ |
-| Y | y | i griego | /j/ |
-| Z | z | zé | /z/ |
-
-Three variants of the Mirandese language exist: Border Mirandese (_Mirandés Raiano_), Central Mirandese (_Mirandés Central_) and Sendinese (_Sendinés_). Most speakers of Mirandese also speak Portuguese.
-
-Despite there being a singular writing system for mirandese, there is one aspect that is written differently in different dialects. In the Sendinese dialect, many words that in other dialects are said with /ʎ/ ⟨lh⟩, are said with /l/ ⟨l⟩ (_alá_ for _alhá_ 'over there', _lado_ for _lhado_ 'side', _luç_ for _lhuç_ 'light', amongst others)
-
-
-# Phonology
-
-/s̺/ and /z̺/ indicate apico-alveolar sibilants (as in modern Catalan, northern/central peninsular Spanish and coastal northern European Portuguese), while /s̻/ and /z̻/ are dentalized laminal alveolar sibilants (as in most modern Portuguese, French and English). The unrelated Basque language also maintains a distinction between /s̺/ and /s̻/ (Basque has no voiced sibilants), which suggests that the distinction originally was an areal feature across Iberia.
-
-Portuguese spelling still distinguishes all seven and is identical to Mirandese spelling in this respect, but in pronunciation, Portuguese has reduced them to four /s, z, ʃ, ʒ/ except in northern hinterland European Portuguese dialects, including those of the area that Mirandese is spoken. Northern/central Peninsular Spanish has also reduced them to four but in quite a different way: /tʃ, θ, s̺, x/. Western Andalusian Spanish and Latin American Spanish have further reduced them to three: /tʃ, s̻, x/.
-
-- Retention of the initial /f/ from Latin, like nearly all dialects of Western Romance (the major maverick being Spanish, where /f/> /h/ > ∅).
-- As in Leonese and Galician-Portuguese, the Latin initial consonant clusters /pl/, /kl/, /fl/ evolve into /tʃ/.
-- Proto-Romance medial clusters -ly- and -cl- became medial /ʎ/.
-- The cluster /-mb-/ is kept.
-- Proto-Romance -mn- becomes /m/: lūm'nem > lume.
-- Falling diphthongs /ei/, /ou/ preserved.
-- Final -o becomes /u/.
-- Voiced sibilants are still maintained.
-- Retention of intervocalic /l/, /n/.
-- Western Romance /ɛ/, /ɔ/ can diphthongize to /jɛ/, /wo/ (as in Italian). That happens not only before palatals, as in Aragonese, but also before nasals.
-- /l/ is palatalized word-initially (as in other Astur-Leonese languages and in Catalan).
-
-# Consonants
-
-- the laminal dental sibilants correspond to Portuguese /s, z/. These are spelled c/ç and z. The corresponding alveolar sibilants are apical and are spelled s(s) and s. Furthermore, there is an additional palatal affricate /tʃ/ ch that is distinct from the fricative /ʃ/, spelled x. The voiced /ʒ/ is spelled j or g, as in Portuguese. Standard Portuguese has reduced all those sounds to just four fricatives: /s, z, ʃ, ʒ/.
-- The "hard" or "long" R is an alveolar trill /r/, as in other varieties of Astur-Leonese and Spanish. The Portuguese uvular fricative [ʁ] is not found in Mirandese. The "soft" or "short" R is an ordinary alveolar tap [ɾ] commonly found in the Iberian Peninsula. As in other languages spoken in the region, the two contrast only in the word-internal position.
-- Voiced stops /b, d, ɡ/ can be lenited as fricatives [β, ð, ɣ].
-
-# Vowels
-
-All oral and nasal vowel sounds and allophones are the same from Portuguese, with different allophones:
-
-- /a/ has allophones of [ä, ɐ], /e/ with [ɛ, e, ɨ], and /o/ with [ɔ, o, u] and [ʊ]. And with the addition of nasal vowel sounds [ɨ̃] and [ɛ̃] for /ẽ/.
-- Vowels /i, u/ can become glides [j, w] when preceding or following other vowels.
-
-# Morphology
-
-As in Portuguese, Mirandese still uses the following synthetic tenses:
-
-. Synthetic pluperfect in -ra.
-. Future subjunctive in -r(e).
-. Personal infinitive in -r(e), which has the same endings as the future subjunctive but often differs as the personal infinitive always uses the infinitive stem, whereas the future subjunctive uses the past.
-
-"""
-
-base = os.path.dirname(__file__)
-
-# Mapping to convert graphemes to phonemes
-with open(os.path.join(base, "g2p.json")) as f:
-    MWL_ALPHABET_MAP = json.load(f)
-
-# direct word look ups
-# https://en.wiktionary.org/wiki/Category:Mirandese_terms_with_IPA_pronunciation
-with open(os.path.join(base, "central.json")) as f:
-    CENTRAL_DICT = json.load(f)
-with open(os.path.join(base, "raiano.json")) as f:
-    RAIANO_DICT = json.load(f)
-with open(os.path.join(base, "sendinese.json")) as f:
-    SENDINESE_DICT = json.load(f)
-
-_vowels = "aeiouáéíóúäɐɛɨɪɔʊ"  # Extended set of vowels for context checking
-_voiced_consonants = "bdgjlmnrvz"  # Approximated list of voiced consonants
-
-
-def _is_vowel(char):
-    """Checks if a character is a vowel."""
-    return char.lower() in _vowels
-
-
-def _is_voiced_consonant(char):
-    """Checks if a character is a voiced consonant."""
-    return char.lower() in _voiced_consonants
-
-
-def _post_process(phonemized: str,
-                  keep_optional_phones=True,
-                  keep_stress_marks=False) -> str:
-    if not keep_stress_marks:
-        phonemized = (phonemized.
-                      replace("ˈ", "").
-                      replace(".", ""))
-    if keep_optional_phones:
-        # just drop parentheses
-        phonemized = (phonemized.
-                      replace("(", "").
-                      replace(")", ""))
-    else:
-        # Remove optional phonemes inside parentheses
-        # This regex finds any content within parentheses and replaces the whole match with an empty string
-        phonemized = re.sub(r'\([^)]*\)', '', phonemized)
-    return phonemized
-
-
-def phonemize_word(word, dialect="central",
-                   word_lookup=True,
-                   keep_optional_phones=True,
-                   keep_stress_marks=False):
-    """
-    Phonemizes a single Mirandese word based on the provided mapping and rules,
-    with support for dialectal variations.
-
-    Args:
-        word (str): The word to phonemize.
-        dialect (str): The dialect to use for phonemization (e.g., "central", "sendinese").
-    """
-    word = word.lower()
-    if word_lookup:
-        if dialect == "sendinese":
-            if word in SENDINESE_DICT:
-                phonemized = SENDINESE_DICT[word]
-                return _post_process(phonemized, keep_optional_phones, keep_stress_marks)
-        elif dialect == "raiano":
-            if word in RAIANO_DICT:
-                phonemized = RAIANO_DICT[word]
-                return _post_process(phonemized, keep_optional_phones, keep_stress_marks)
-
-        if word in CENTRAL_DICT:
-            phonemized = CENTRAL_DICT[word]
-            return _post_process(phonemized, keep_optional_phones, keep_stress_marks)
-
-    phonemes = []
-    i = 0
-    while i < len(word):
-        matched = False
-
-        # Try to match multi-character graphemes first (longest first)
-        # This ensures 'ch' is matched before 'c', 'lh' before 'l', etc.
-        # Also handles new clusters like 'pl', 'kl', 'fl', 'mn', 'ly', 'cl', 'll', 'nn'
-        for length in sorted([len(g) for g in MWL_ALPHABET_MAP.keys()], reverse=True):
-            if i + length <= len(word):
-                grapheme = word[i:i + length].lower()
-
-                # Handle dialectal variations for 'l' and 'lh'
-                if dialect == "sendinese":
-                    if grapheme == "lh":
-                        phonemes.append(MWL_ALPHABET_MAP["l"][0])  # 'lh' becomes [l] in Sendinese
-                        i += length
-                        matched = True
-                        break
-                    elif grapheme == "l" and i == 0:  # Initial 'l' in Sendinese remains [l]
-                        phonemes.append(MWL_ALPHABET_MAP["l"][0])
-                        i += length
-                        matched = True
-                        break
-
-                if grapheme in MWL_ALPHABET_MAP:
-                    # Apply specific rules for graphemes based on context
-                    if grapheme == "b":
-                        # Rule: b = [β] between vowels and after voiced consonants
-                        if (i > 0 and _is_vowel(word[i - 1])) and \
-                                (i + 1 < len(word) and _is_vowel(word[i + 1])):
-                            phonemes.append(MWL_ALPHABET_MAP["b"][1])  # [β] between vowels
-                        elif i > 0 and _is_voiced_consonant(word[i - 1]):
-                            phonemes.append(MWL_ALPHABET_MAP["b"][1])  # [β] after voiced consonants
-                        else:
-                            phonemes.append(MWL_ALPHABET_MAP["b"][0])  # [b] otherwise
-                    elif grapheme == "c":
-                        # Rule: c = [s̻] before e or i, [k] elsewhere
-                        if (i + 1 < len(word) and word[i + 1].lower() in "ei"):
-                            phonemes.append(MWL_ALPHABET_MAP["c"][1])  # [s̻] before e or i (second element in map)
-                        else:
-                            phonemes.append(MWL_ALPHABET_MAP["c"][0])  # [k] elsewhere (first element in map)
-                    elif grapheme == "ç":
-                        # Rule: ç = [z̻] before words starting with voiced consonants
-                        # This rule is tricky without full word context (e.g., "words starting with voiced consonants")
-                        # For now, a simplified interpretation: if followed by a voiced consonant within the word.
-                        # A more accurate implementation would require sentence-level context.
-                        if i + 1 < len(word) and _is_voiced_consonant(word[i + 1]):
-                            phonemes.append(MWL_ALPHABET_MAP["ç"][0])  # [z̻]
-                        else:
-                            phonemes.append(MWL_ALPHABET_MAP["ç"][0])  # Default to [z̻]
-                    elif grapheme == "d":
-                        # Rule: d = [ð] between vowels and after r
-                        if (i > 0 and _is_vowel(word[i - 1])) and \
-                                (i + 1 < len(word) and _is_vowel(word[i + 1])):
-                            phonemes.append(MWL_ALPHABET_MAP["d"][1])  # [ð] between vowels
-                        elif i > 0 and word[i - 1].lower() == 'r':
-                            phonemes.append(MWL_ALPHABET_MAP["d"][1])  # [ð] after r
-                        else:
-                            phonemes.append(MWL_ALPHABET_MAP["d"][0])  # [d] otherwise
-                    elif grapheme == "e":
-                        # Rule: e = [ɨ/ɨ̃] before stressed syllables
-                        # This rule requires stress prediction, which is beyond this rule-based phonemizer.
-                        # Defaulting to the first phoneme [e].
-                        phonemes.append(MWL_ALPHABET_MAP["e"][0])
-                    elif grapheme == "g":
-                        # Rule: g = [ɣ] between vowels and after r. Before e and i, g = [ʒ].
-                        # g = [ɡu] in certain words, such as guira, guiron and guirica. g = [gu̯] before a
-                        if (i > 0 and _is_vowel(word[i - 1])) and \
-                                (i + 1 < len(word) and _is_vowel(word[i + 1])):
-                            phonemes.append(MWL_ALPHABET_MAP["g"][1])  # [ɣ] between vowels
-                        elif i > 0 and word[i - 1].lower() == 'r':
-                            phonemes.append(MWL_ALPHABET_MAP["g"][1])  # [ɣ] after r
-                        elif (i + 1 < len(word) and word[i + 1].lower() in "ei"):
-                            phonemes.append(MWL_ALPHABET_MAP["g"][2])  # [ʒ] before e and i
-                        # The [ɡu] and [gu̯] rules are word-specific and complex for a simple rule-based system.
-                        # Defaulting to [g] for other cases.
-                        else:
-                            phonemes.append(MWL_ALPHABET_MAP["g"][0])
-                    elif grapheme == "gu":
-                        # Rule: gu = [ɣ] between vowels and after r
-                        # Simplified: checking context around 'gu'
-                        if (i > 0 and _is_vowel(word[i - 1])) and \
-                                (i + 2 < len(word) and _is_vowel(word[i + 2])):  # Check the character *after* 'u'
-                            phonemes.append(MWL_ALPHABET_MAP["gu"][2])  # [ɣ] between vowels (third element in map)
-                        elif i > 0 and word[i - 1].lower() == 'r':
-                            phonemes.append(MWL_ALPHABET_MAP["gu"][2])  # [ɣ] after r
-                        else:
-                            phonemes.append(MWL_ALPHABET_MAP["gu"][0])  # [g] otherwise (first element in map)
-                    elif grapheme == "i":
-                        # Rule: i can become glide [j] when preceding or following other vowels.
-                        is_glide = False
-                        # Check if 'i' is followed by a vowel
-                        if i + 1 < len(word) and _is_vowel(word[i + 1]):
-                            is_glide = True
-                        # Check if 'i' is preceded by a vowel
-                        elif i > 0 and _is_vowel(word[i - 1]):
-                            is_glide = True
-
-                        if is_glide:
-                            phonemes.append(MWL_ALPHABET_MAP["i"][1])  # [j]
-                        else:
-                            phonemes.append(MWL_ALPHABET_MAP["i"][0])  # [i]
-                    elif grapheme == "l":
-                        # This rule is now handled by the dialect-specific check above for 'sendinese'
-                        if dialect != "sendinese" and i == 0:
-                            phonemes.append(MWL_ALPHABET_MAP["l"][1])  # [ʎ] at the beginning of words (non-Sendinese)
-                        else:
-                            phonemes.append(MWL_ALPHABET_MAP["l"][0])  # [l] elsewhere
-                    elif grapheme == "lh":
-                        # This rule is now handled by the dialect-specific check above for 'sendinese'
-                        if dialect != "sendinese":
-                            phonemes.append(MWL_ALPHABET_MAP["lh"][0])  # [ʎ] for 'lh' (non-Sendinese)
-                        # else: handled by the 'sendinese' block above
-                    elif grapheme == "m":
-                        # Rule: m is silent before nasalized front vowels, e.g. amportante
-                        # Default to [m]. Nasalization of preceding vowels is handled by AN, EN, IN, ON, UN.
-                        phonemes.append(MWL_ALPHABET_MAP["m"][0])  # [m]
-                    elif grapheme == "n":
-                        # Rule: n = [ŋ] before k, g, q (velar consonants), otherwise [n].
-                        # Nasalization of preceding vowels is handled by AN, EN, IN, ON, UN.
-                        if i + 1 < len(word) and word[i + 1].lower() in "kgq":
-                            phonemes.append(MWL_ALPHABET_MAP["n"][1])  # [ŋ]
-                        else:
-                            phonemes.append(MWL_ALPHABET_MAP["n"][0])  # [n]
-                    elif grapheme == "o":
-                        # Rule: o = [u] when unstressed. Also, final -o becomes /u/.
-                        if i == len(word) - 1:  # If 'o' is the last character in the word
-                            phonemes.append(MWL_ALPHABET_MAP["o"][2])  # [u] (third element in map)
-                        # This rule requires stress prediction, which is beyond this rule-based phonemizer.
-                        # Defaulting to the first phoneme [ɔ] for non-final 'o'.
-                        else:
-                            phonemes.append(MWL_ALPHABET_MAP["o"][0])
-                    elif grapheme == "qu":
-                        # Rule: qu = [k] before e and i, and [kṷ] before a and en
-                        if (i + 2 < len(word) and word[i + 2].lower() in "ei"):
-                            phonemes.append(MWL_ALPHABET_MAP["qu"][0])  # [k] before e and i
-                        elif (i + 2 < len(word) and word[i + 2].lower() == "a") or \
-                                (i + 2 < len(word) - 1 and word[i + 2:i + 4].lower() == "en"):
-                            phonemes.append(MWL_ALPHABET_MAP["qu"][1])  # [kṷ] before a or en
-                        else:
-                            phonemes.append(MWL_ALPHABET_MAP["qu"][0])  # default to [k]
-                    elif grapheme == "r":
-                        # Rule: r = [rr] at the beginning of words and after n
-                        # The "hard" or "long" R is an alveolar trill /r/. The "soft" or "short" R is an alveolar tap [ɾ].
-                        # The map has ["ɾ", "r", "rr"]. So "r" is the trill, "ɾ" is the tap.
-                        if i == 0 or (i > 0 and word[i - 1].lower() == 'n'):  # At beginning or after n
-                            phonemes.append(MWL_ALPHABET_MAP["r"][1])  # [r] (second element in map, the trill)
-                        else:
-                            phonemes.append(MWL_ALPHABET_MAP["r"][0])  # [ɾ] elsewhere (first element in map, the tap)
-                    elif grapheme == "s":
-                        # Rule: s = [s̺] when in initial position and before silent consonants.
-                        # Between vowels and before voiced consonants, s = [z̺]
-                        if i == 0 or (i + 1 < len(word) and not _is_vowel(
-                                word[i + 1])):  # Initial or before non-vowel (simplified 'silent consonant')
-                            phonemes.append(MWL_ALPHABET_MAP["s"][0])  # [s̺]
-                        elif (i > 0 and _is_vowel(word[i - 1])) and \
-                                (i + 1 < len(word) and _is_voiced_consonant(word[i + 1])):
-                            phonemes.append(
-                                MWL_ALPHABET_MAP["s"][1])  # [z̺] between vowels and before voiced consonants
-                        elif (i > 0 and _is_vowel(word[i - 1])) and \
-                                (i + 1 < len(word) and _is_vowel(word[i + 1])):
-                            phonemes.append(MWL_ALPHABET_MAP["s"][1])  # [z̺] between vowels
-                        else:
-                            phonemes.append(MWL_ALPHABET_MAP["s"][0])  # Default [s̺]
-                    elif grapheme == "u":
-                        # Rule: u can become glide [w] when preceding or following other vowels.
-                        is_glide = False
-                        # Check if 'u' is followed by a vowel
-                        if i + 1 < len(word) and _is_vowel(word[i + 1]):
-                            is_glide = True
-                        # Check if 'u' is preceded by a vowel
-                        elif i > 0 and _is_vowel(word[i - 1]):
-                            is_glide = True
-
-                        if is_glide:
-                            phonemes.append(MWL_ALPHABET_MAP["u"][1])  # [w]
-                        else:
-                            phonemes.append(MWL_ALPHABET_MAP["u"][0])  # [u]
-                    # For v and w, the map has multiple options, but Wikipedia implies primarily for loanwords.
-                    # Sticking to the first phoneme in the map as default for simplicity.
-                    elif grapheme == "v":
-                        phonemes.append(MWL_ALPHABET_MAP["v"][0])
-                    elif grapheme == "w":
-                        phonemes.append(MWL_ALPHABET_MAP["w"][0])
-                    # --- cluster rules ---
-                    elif grapheme in ["pl", "kl", "fl", "mn", "ly", "cl", "ll", "nn"]:
-                        phonemes.append(MWL_ALPHABET_MAP[grapheme][0])
-                    else:
-                        # For other graphemes, take the first phoneme in the list as default
-                        phonemes.append(MWL_ALPHABET_MAP[grapheme][0])
-
-                    i += length
-                    matched = True
-                    break  # Break from the inner loop (grapheme lengths) once a match is found
-
-        # If no multi-character grapheme matched, try single character
-        if not matched:
-            if word[i].lower() in MWL_ALPHABET_MAP:
-                phonemes.append(MWL_ALPHABET_MAP[word[i].lower()][0])
-            elif word[i] in string.punctuation + string.whitespace:
-                phonemes.append(word[i])  # Keep punctuation as is
-            else:
-                phonemes.append(word[i])  # Fallback for any unmapped character
-            i += 1
-    phonemized = "".join(phonemes)
-    return _post_process(phonemized, keep_optional_phones, keep_stress_marks)
-
-
-def mirandese_phonemizer(text, dialect="central", word_lookup=True, keep_optional_phones=True, keep_stress_marks=False):
-    """
-    Phonemizes a Mirandese text, separating words with '|' and preserving punctuation.
-    Supports different dialects.
-
-    Args:
-        text (str): The input Mirandese text.
-        dialect (str): The dialect to use for phonemization (e.g., "central", "sendinese").
-        word_lookup (bool): Whether to use the direct word lookup dictionaries.
-        keep_optional_phones (bool): If True, keeps optional phonemes in parentheses. If False, removes them.
-        keep_stress_marks (bool): If True, keeps stress marks and syllable dots. If False, removes them.
-    """
-    text = text.replace("-", " ")
-    words = re.findall(r"\b\w+\b|[\W_]+", text)  # Split by words and keep punctuation/spaces
-    phonemized_parts = []
-    for word_or_punc in words:
-        if word_or_punc.isalpha():
-            phonemized_parts.append(
-                phonemize_word(word_or_punc, dialect, word_lookup, keep_optional_phones, keep_stress_marks))
-        else:
-            phonemized_parts.append(word_or_punc)  # Keep punctuation and spaces as is
-    return "".join(phonemized_parts)
+from mwl_phonemizer.crf_mwl import  CRFPhonemizer
+from mwl_phonemizer.epitran_mwl import EpitranMWL
+from mwl_phonemizer.espeak_mwl import EspeakMWL
+from mwl_phonemizer.ngram_mwl import NgramMWLPhonemizer
+from mwl_phonemizer.orthography_hand_rules import OrthographyRulesMWL
 
 
 if __name__ == "__main__":
     sample_texts = [
         "Muitas lhénguas ténen proua de ls sous pergaminos antigos, de la lhiteratura screbida hai cientos d'anhos i de scritores hai muito afamados, hoije bandeiras dessas lhénguas. Mas outras hai que nun puoden tener proua de nada desso, cumo ye l causo de la lhéngua mirandesa.",
         "Todos ls seres houmanos nácen lhibres i eiguales an honra i an dreitos. Dotados de rezon i de cuncéncia, dében de se dar bien uns culs outros i cumo armano",
+        "Hai más fuogo alhá, i ye deimingo!",
         """Quien dirie qu'antre ls matos eiriçados
     Las ourriêtas i ls rius d'esta tiêrra,
     Bibie, cumo l chaugarço de la siêrra,
@@ -421,15 +26,19 @@ if __name__ == "__main__":
     L furdes ber, talbéç que stéia muôrto!"""
     ]
 
+    phonemizer = EpitranMWL()
     for text in sample_texts:
         print(f"Original: {text}")
-        print(f"Phonemized: {mirandese_phonemizer(text)}\n")
+        print(f"Phonemized: {phonemizer.phonemize_sentence(text)}\n")
 
     # Original: Muitas lhénguas ténen proua de ls sous pergaminos antigos, de la lhiteratura screbida hai cientos d'anhos i de scritores hai muito afamados, hoije bandeiras dessas lhénguas. Mas outras hai que nun puoden tener proua de nada desso, cumo ye l causo de la lhéngua mirandesa.
-    # Phonemized: mujtas̺ ʎɛ~gas̺ tɛnẽŋ pɾowa dɛ ʎs̺ s̺ows̺ pɛɾɣamĩŋɔs̺ ɐ̃ŋtiɣɔs̺, dɛ ʎa ʎitɛɾatuɾa s̺kɾɛβiða aj s̻iẽŋtɔs̺ d'ɐ̃ŋɔs̺ i dɛ s̺kɾitɔɾɛs̺ aj mujtɔ afamaðɔs̺, ojʒɛ bɐ̃ŋdejɾas̺ dɛs̺as̺ ʎɛ~gas̺. mas̺ owtɾas̺ aj kɛ nũŋ pwoðẽŋ tẽŋɛɾ pɾowa dɛ naða dɛs̺ɔ, kumɔ jɛ ʎ kauz̺ɔ dɛ ʎa ʎɛ~ga miɾɐ̃ŋdɛz̺a.
+    # Phonemized: mujtɐs̺ ʎenɡɐs̺ tenɛ̃ pɾowuɐ dɛ ls̺ sowus̺ pɛɾɡɐminos̺ ɐntiɡos̺, dɛ ʎɐ ʎitɛɾɐtuɾɐ s̺kɾβdɐ aj s̻iɛntos̻ d'ɐnos̺ i dɛ s̺kɾitoɾɛs̺ aj mujtu ɐfɐmðs̺, owiʒɛ bɐndɛjɾɐs̺ dɛʃsɐs̺ ʎenɡɐs̺. mɐs̺ owutrɐs̺ aj kʷɛ nũ puð̃ tɨˈneɾ pɾowuɐ dɛ nð dɛʃsu, kumu ˈje l̩ kawzu dɛ ʎɐ ˈʎɛ̃ɡwɐ miɾɐndɛzɐ.
     #
     # Original: Todos ls seres houmanos nácen lhibres i eiguales an honra i an dreitos. Dotados de rezon i de cuncéncia, dében de se dar bien uns culs outros i cumo armano
-    # Phonemized: tɔðɔs̺ ʎs̺ s̺ɛɾɛs̺ owmɐ̃ŋɔs̺ nas̻ẽŋ ʎibɾɛs̺ i ejɣalɛs̺ ɐ̃ŋ õŋrra i ɐ̃ŋ dɾejtɔs̺. dɔtaðɔs̺ dɛ rrɛzõŋ i dɛ kũŋkɛ~s̻ja, dɛβẽŋ dɛ s̺ɛ daɾ biẽŋ ũŋs̺ kuls̺ owtɾɔs̺ i kumɔ aɾmɐ̃ŋɔ
+    # Phonemized: tðs̺ ls̺ sɛɾɛs̺ owumɐnos̺ nazɛ̃ ʎibrɛs̺ i ɛjɡɐlɛs̺ ɐ̃ onrɐ i ɐ̃ dɾɛjtos̺. dotðs̺ dɛ rɛzõ i dɛ kuns̻ens̻iɐ, dβ̃ dɛ sɛ dɐɾ biɛ̃ uns̺ kuls̺ owutros̺ i kumu ɐɾmɐnu
+    #
+    # Original: Hai más fuogo alhá, i ye deimingo!
+    # Phonemized: aj mas̺ fwoɣʊ ɐˈʎa, i ˈje dejˈmĩgʊ!
     #
     # Original: Quien dirie qu'antre ls matos eiriçados
     #     Las ourriêtas i ls rius d'esta tiêrra,
@@ -445,53 +54,17 @@ if __name__ == "__main__":
     #     La patri' an que naciu, la casa i l huôrto.
     #     Tamien se squeçe de la fala! Quando
     #     L furdes ber, talbéç que stéia muôrto!
-    # Phonemized: kiẽŋ diɾiɛ k'ɐ̃ŋtɾɛ ʎs̺ matɔs̺ ejɾiz̻aðɔs̺
-    #     ʎas̺ owrjetas̺ i ʎs̺ rriws̺ d'ɛs̺ta tjera,
-    #     biβiɛ, kumɔ ʎ tʃauɣaɾz̻ɔ dɛ ʎa s̺jera,
-    #     wa ʎɛ~ga dɛ s̺õŋs̺ tɐ̃ŋ baɾjaðɔs̺?
+    # Phonemized: kʷiɛ̃ diɾiɛ k'ɐntɾɛ ls̺ mɐtos̺ ɛjɾisðs̻
+    #     ʎɐs̺ owurietɐs̺ i ls̺ riws̺ d'ɛʃtɐ tierɐ,
+    #     bβɛ, kumu l̩ kawɡɐɾsu dɛ ʎɐ s̻ierɐ,
+    #     ˈũŋɐ ˈʎɛ̃ɡwɐ dɛ sons̺ tɐ̃ bɐɾiðs̺?
     #
-    #     mɔs̺tɾɛ-s̺ɛ i falɛ-s̺' ɛs̺a ʎɛ~ga fiʎa
-    #     d'ũŋ pɔβɔ kɛ tẽŋ nejʎa ʎ tʃɔɾɔ i ʎ kɐ̃ŋtɔ!
-    #     naða pɔɾ s̻jeɾtɔ mɔs̺ kautiβa tɐ̃ŋtɔ
-    #     kumɔ ʎa fɔɾm' ɐ̃ŋ kɛ ʎ'ejðeja bɾiʎa.
+    #     moʃtɾɛ sɛ i fɐlɛ s̺̺' ɛʃsɐ ˈʎɛ̃ɡwɐ filɐ
+    #     d'ũ pβ kʷɛ tɛ̃ nɛjlɐ l̩ koɾu i l̩ kɐntu!
+    #     nð poɾ s̻ieɾtu mos̺ kawtβ tɐntu
+    #     kumu ʎɐ foɾ' ɐ̃ kʷɛ l̩'ɛjdɛjɐ bɾilɐ.
     #
-    #     zgɾaz̻jaðɔ d'akɛl, k'aβɐ̃ŋdõŋɐ̃ŋdɔ
-    #     ʎa patɾi' ɐ̃ŋ kɛ nas̻iw, ʎa kaz̺a i ʎ uɾtɔ.
-    #     tamiẽŋ s̺ɛ s̺kɛz̻ɛ dɛ ʎa fala! kṷɐ̃ŋdɔ
-    #     ʎ fuɾðɛs̺ bɛɾ, talβɛz̻ kɛ s̺tɛja muɾtɔ!
-
-
-    print("\n--- Dialect-Specific Examples from Wikipedia Table ---")
-
-    test_sentence = "Hai más fuogo alhá, i ye deimingo!"
-    print(f"Original: {test_sentence}")
-
-    # Raiano Dialect
-    print("\n--- Raiano ---")
-    print(f"Expected IPA: ˈaj ˈmas̺ ˈfwo.ɣʊ/u/ˈfwo.ʊ/u ɐˈʎa, ˈi ˈje dejˈmĩ.gʲʊ/u\n")
-    print(f"Phonemized (Raiano, with optional, using dict): {mirandese_phonemizer(test_sentence, dialect='raiano', word_lookup=True,  keep_optional_phones=True)}")
-    print(f"Phonemized (Raiano, no optional, using dict): {mirandese_phonemizer(test_sentence, dialect='raiano', word_lookup=True,keep_optional_phones=False)}")
-    print(f"Phonemized (Raiano, no dict): {mirandese_phonemizer(test_sentence, dialect='raiano', word_lookup=False)}\n")
-
-    # Central Dialect
-    print("\n--- Central ---")
-    print(f"Expected IPA: ˈaj ˈmas̺/ˈmajs̺ ˈfwo.ɣʊ/u ɐˈʎa, i je dejˈmĩ.gʊ/u\n")
-    print(f"Phonemized (Central, with optional, using dict): {mirandese_phonemizer(test_sentence, dialect='central', word_lookup=True,  keep_optional_phones=True)}")
-    print(f"Phonemized (Central, no optional, using dict): {mirandese_phonemizer(test_sentence, dialect='central', word_lookup=True,  keep_optional_phones=False)}")
-    print(f"Phonemized (Central, no dict): {mirandese_phonemizer(test_sentence, dialect='central', word_lookup=False)}\n")
-
-    # Sendinese Dialect
-    print("\n--- Sendinese ---")
-    print(f"Expected IPA: ˈaj ˈmas̺ ˈfu.ɣʊ/u ɐˈla, ˈi ˈ(j)i dɨˈmʊ̃j̃.gʲʊ/u\n")
-    print(f"Phonemized (Sendinese, with optional, using dict): {mirandese_phonemizer(test_sentence, dialect='sendinese', word_lookup=True, keep_optional_phones=True)}")
-    print(f"Phonemized (Sendinese, no optional, using dict): {mirandese_phonemizer(test_sentence, dialect='sendinese', word_lookup=True, keep_optional_phones=False)}")
-    print(f"Phonemized (Sendinese, no dict): {mirandese_phonemizer(test_sentence, dialect='sendinese', word_lookup=False)}\n")
-
-    # Example demonstrating 'lh' to 'l' in Sendinese
-    print(f"Original: alhá")
-    print(f"Phonemized (Central): {mirandese_phonemizer('alhá', dialect='central')}")  # Should be aʎa
-    print(f"Phonemized (Sendinese): {mirandese_phonemizer('alhá', dialect='sendinese')}\n")  # Should be ala
-
-    print(f"Original: Lhado")
-    print(f"Phonemized (Central): {mirandese_phonemizer('Lhado', dialect='central')}")  # Should be ʎado
-    print(f"Phonemized (Sendinese): {mirandese_phonemizer('Lhado', dialect='sendinese')}\n")  # Should be lado
+    #     zɡɾɐs̻ið d'ɐkʷɛl, k'βndonɐndu
+    #     ʎɐ pɐtri' ɐ̃ kʷɛ nɐziw, ʎɐ kɐzɐ i l̩ uoɾtu.
+    #     tɐˈmjẽ sɛ s̻kʷɛsɛ dɛ ʎɐ fɐlɐ! ˈkwɐ̃du
+    #     l̩ fuɾdɛs̺ bɛɾ, tɐlbes kʷɛ s̺tejɐ muoɾtu!
