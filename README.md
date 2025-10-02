@@ -20,19 +20,15 @@ This repository contains a Python-based Mirandese phonemizer, designed to conver
 ## **Usage**
 
 ```python
-# pick one
-from mwl_phonemizer.crf_mwl import  CRFPhonemizer
-from mwl_phonemizer.epitran_mwl import EpitranMWL
-from mwl_phonemizer.espeak_mwl import EspeakMWL
-from mwl_phonemizer.ngram_mwl import NgramMWLPhonemizer
-from mwl_phonemizer.orthography_hand_rules import OrthographyRulesMWL
+from mwl_phonemizer.crf_espeak_mwl import CRFEspeakCorrector
+
 
 sample_texts = [
     "Muitas lhénguas ténen proua de ls sous pergaminos antigos, de la lhiteratura screbida hai cientos d'anhos i de scritores hai muito afamados, hoije bandeiras dessas lhénguas. Mas outras hai que nun puoden tener proua de nada desso, cumo ye l causo de la lhéngua mirandesa.",
     "Todos ls seres houmanos nácen lhibres i eiguales an honra i an dreitos. Dotados de rezon i de cuncéncia, dében de se dar bien uns culs outros i cumo armano",
 ]
 
-phonemizer = EpitranMWL()
+phonemizer = CRFEspeakCorrector()
 for text in sample_texts:
     print(f"Original: {text}")
     print(f"Phonemized: {phonemizer.phonemize_sentence(text)}\n")
@@ -68,12 +64,15 @@ print(f"Stress-Agnostic IPA: {stress_agnostic_ipa}")
 ## **Phonemizer Comparison**
 
 | Phonemizer            | PER (Full IPA, Stress) | PER (Stress-Agnostic) | Words Incorrect (ED>0) | Notes                                                     |
-| --------------------- |------------------------|-----------------------| ---------------------- | --------------------------------------------------------- |
-| **CRF**               | 20.25%                 | 20.76%                | 117                    | Character-level CRF trained on aligned word–phoneme pairs |
+|-----------------------|------------------------|-----------------------|------------------------|-----------------------------------------------------------|
+| **Espeak + CRF**      | 59.98% → 3.72%         | 39.51% → 4.26%        | 35                     | Espeak output corrected with a CRF model                  |
+| **Epitran + CRF**     | 51.37% → 16.54%        | 44.89% → 18.97%       | 110                    | Epitran output corrected with a CRF model                 |
+| **CRF**               | 15.36%                 | 17.06%                | 117                    | Character-level CRF trained on aligned word–phoneme pairs |
+| **Orthography Rules** | 39.04%                 | 31.99%                | 136                    | Hand-crafted orthographic rules                           |
+| **Epitran + Rules**   | 51.37% → 47.26%        | 44.89% → 40.07%       | 137                    | Epitran output corrected with hand-crafted rules          |
+| **Espeak + Rules**    | 59.98% → 52.35%        | 39.51% → 30.30%       | 73                     | Espeak output corrected with hand-crafted rules           |
 | **N-gram (n=4)**      | 43.93%                 | 30.98%                | 141                    | Statistical N-gram model for G2P conversion               |
-| **Orthography Rules** | 39.04%                 | 31.99%                | 136                    | Handcrafted orthographic rules for all dialects           |
-| **Epitran**           | 51.37% → 47.26%        | 44.89% → 40.07%       | 145                    | Epitran output corrected with Mirandese-specific rules    |
-| **Espeak**            | 59.98% → 52.35%        | 39.51% → 30.30%       | 145                    | Espeak IPA output corrected with rules                    |
+| **Character lookup**  | 43.84%                 | 36.92%                | 142                    | Simple letter/digraph to phoneme lookup table             |
 
 **Notes:**
 
