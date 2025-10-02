@@ -67,15 +67,6 @@ print(f"Stress-Agnostic IPA: {stress_agnostic_ipa}")
 
 ---
 
-## **Limitations**
-
-* **Stress Prediction:** The current system does not perform stress prediction. Rules dependent on stress (e.g., vowel allophones, diphthongization of short e in stressed positions) are simplified or not fully implemented.
-* **Complex Allophony:** Contextual application of some allophones is not fully covered.
-* **Sentence-Level Context:** Broader context rules (e.g., ç before words starting with voiced consonants) are approximated at the word level.
-* **Dialectal Nuances:** Some specific variations (e.g., gʲʊ for gu in Raiano/Sendinese) are only partially captured.
-
----
-
 ## **Phonemizer Comparison**
 
 | Phonemizer            | PER (Full IPA, Stress) | PER (Stress-Agnostic) | Words Incorrect (ED>0) | Notes                                                     |
