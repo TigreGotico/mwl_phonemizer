@@ -56,7 +56,7 @@ setup(
     include_package_data=True,
     package_data={'': extra_files},
     install_requires=required('requirements.txt'),
-    url='https://github.com/TigreGoticomwl_phonemizer',
+    url='https://github.com/TigreGotico/mwl_phonemizer',
     license='',
     author='JarbasAi',
     author_email='jarbasai@mailfence.com',
