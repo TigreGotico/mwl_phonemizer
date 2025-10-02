@@ -3,6 +3,10 @@ from mwl_phonemizer.epitran_mwl import EpitranMWL
 from mwl_phonemizer.espeak_mwl import EspeakMWL
 from mwl_phonemizer.ngram_mwl import NgramMWLPhonemizer
 from mwl_phonemizer.orthography_hand_rules import OrthographyRulesMWL
+from mwl_phonemizer.crf_espeak_mwl import CRFEspeakCorrector
+from mwl_phonemizer.crf_epitran_mwl import CRFEpitranCorrector
+from mwl_phonemizer.char_lookup_mwl import LookupTableMWL
+
 
 
 if __name__ == "__main__":
@@ -26,7 +30,7 @@ if __name__ == "__main__":
     L furdes ber, talbéç que stéia muôrto!"""
     ]
 
-    phonemizer = EpitranMWL()
+    phonemizer = CRFEspeakCorrector()
     for text in sample_texts:
         print(f"Original: {text}")
         print(f"Phonemized: {phonemizer.phonemize_sentence(text)}\n")
