@@ -70,7 +70,7 @@ class EspeakMWL(MirandesePhonemizer):
     # -------------------------
     def phonemize(self, word: str, lookup_word: bool = True) -> str:
         """Phonemize a single Mirandese word via espeak + correction rules."""
-        if lookup_word and word.lower() in GOLD:
+        if lookup_word and word.lower() in self.GOLD:
             return self.GOLD[word.lower()]
         espeak_ipa = self.pho.phonemize_string(word, "pt-PT")
         corrected = self._apply_with_ortho(espeak_ipa, word)
@@ -86,6 +86,8 @@ class EspeakMWL(MirandesePhonemizer):
         # handle common standalone words, like determinants
         if ortho == "l":
             return "l̩"
+        elif ortho == "ls":
+            return "l̩s̺"
 
         # -------------------------
         # Global substitutions
@@ -300,7 +302,7 @@ if __name__ == "__main__":
         print("All words achieved an exact match (100% Accuracy)!")
 
     # ==================================================
-    #       Mirandese Phonemizer Espeak Evaluation
+    #       Mirandese Phonemizer Rule Evaluation
     # ==================================================
     # Total Words Evaluated: 145
     #

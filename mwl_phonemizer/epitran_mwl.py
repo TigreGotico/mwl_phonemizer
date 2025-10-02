@@ -31,6 +31,8 @@ class EpitranMWL(MirandesePhonemizer):
         # handle common standalone words, like determinants
         if ortho == "l":
             return "l̩"
+        elif ortho == "ls":
+            return "l̩s̺"
 
         # -------------------------
         # Global substitutions

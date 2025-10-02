@@ -428,10 +428,10 @@ if __name__ == "__main__":
     # Total Words Evaluated: 145
     #
     # ## Phoneme Error Rate (PER, Full IPA Match, includes stress)
-    # PER:    39.14%
+    # PER:    39.04%
     #
     # ## Phoneme Error Rate (PER, Stress-Agnostic)
-    # PER:    32.10%
+    # PER:    31.99%
     #
     # --- Incorrectly Phonemized Words (Full IPA Match ED > 0) ---
     # Total Incorrect: 136 words

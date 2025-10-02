@@ -70,10 +70,10 @@ print(f"Stress-Agnostic IPA: {stress_agnostic_ipa}")
 ## **Phonemizer Comparison**
 
 | Phonemizer            | PER (Full IPA, Stress) | PER (Stress-Agnostic) | Words Incorrect (ED>0) | Notes                                                     |
-| --------------------- | ---------------------- | --------------------- | ---------------------- | --------------------------------------------------------- |
+| --------------------- |------------------------|-----------------------| ---------------------- | --------------------------------------------------------- |
 | **CRF**               | 20.25%                 | 20.76%                | 117                    | Character-level CRF trained on aligned word–phoneme pairs |
 | **N-gram (n=4)**      | 43.93%                 | 30.98%                | 141                    | Statistical N-gram model for G2P conversion               |
-| **Orthography Rules** | 39.14%                 | 32.10%                | 136                    | Handcrafted orthographic rules for all dialects           |
+| **Orthography Rules** | 39.04%                 | 31.99%                | 136                    | Handcrafted orthographic rules for all dialects           |
 | **Epitran**           | 51.37% → 47.26%        | 44.89% → 40.07%       | 145                    | Epitran output corrected with Mirandese-specific rules    |
 | **Espeak**            | 59.98% → 52.35%        | 39.51% → 30.30%       | 145                    | Espeak IPA output corrected with rules                    |
 
