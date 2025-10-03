@@ -5,6 +5,7 @@ from mwl_phonemizer.ngram_mwl import NgramMWLPhonemizer
 from mwl_phonemizer.orthography_hand_rules import OrthographyRulesMWL
 from mwl_phonemizer.crf_espeak_mwl import CRFEspeakCorrector
 from mwl_phonemizer.crf_epitran_mwl import CRFEpitranCorrector
+from mwl_phonemizer.crf_ortho_mwl import CRFOrthoCorrector
 from mwl_phonemizer.char_lookup_mwl import LookupTableMWL
 
 

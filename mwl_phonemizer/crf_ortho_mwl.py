@@ -1,20 +1,22 @@
-from mwl_phonemizer.base import Dialects
 from mwl_phonemizer.crf_mwl import CRFPhonemizer
-from mwl_phonemizer.espeak_mwl import _EspeakPhonemizer
+from mwl_phonemizer.orthography_hand_rules import OrthographyRulesMWL
 
 
-class CRFEspeakCorrector(CRFPhonemizer):
+class CRFOrthoCorrector(CRFPhonemizer):
     def __init__(self, *args, **kwargs):
-        self.espeak = _EspeakPhonemizer()
-        super().__init__(*args, ignore_stress=False, **kwargs)
+        self.phonemizer = OrthographyRulesMWL()
+        DATASET = [(self.phonemizer.phonemize(word, lookup_word=False), gold)
+                   for word, gold in self.phonemizer.GOLD.items()]
+        DATASET += [(gold, gold)  # so it learns not to touch correct phones
+                   for word, gold in self.phonemizer.GOLD.items()]
+        super().__init__(*args, ignore_stress=True, train_data=DATASET, **kwargs)
 
     def grapheme_transforms(self, word: str) -> str:
-        word = word.replace("ch", "tch")
-        return self.espeak.phonemize_string(word)
+        return self.phonemizer.phonemize(word, lookup_word=False)
 
 
 if __name__ == "__main__":
-    phonemizer = CRFEspeakCorrector(dialect=Dialects.CENTRAL)
+    phonemizer = CRFOrthoCorrector()
 
     # Evaluate on the same data (overfitting expected due to small dataset)
     stats = phonemizer.evaluate_on_gold(limit=None, detailed=False, show_changes=False)
