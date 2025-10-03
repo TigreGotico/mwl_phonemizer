@@ -144,6 +144,8 @@ class OrthographyRulesMWL(MirandesePhonemizer):
             word (str): The word to phonemize..
         """
         word = word.lower()
+        if word == "l":
+            return "l̩"
 
         phonemes = []
         i = 0
@@ -373,7 +375,7 @@ class OrthographyRulesMWL(MirandesePhonemizer):
     # -------------------------
     def phonemize(self, word: str, lookup_word: bool = True) -> str:
         """Phonemize a single Mirandese word via espeak + correction rules."""
-        if lookup_word and word.lower() in GOLD:
+        if lookup_word and word.lower() in self.GOLD:
             return self.GOLD[word.lower()]
         return self.phonemize_word(word)
 
