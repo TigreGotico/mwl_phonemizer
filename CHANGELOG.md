@@ -1,12 +1,12 @@
 # Changelog
 
-## [0.0.3a1](https://github.com/TigreGotico/mwl_phonemizer/tree/0.0.3a1) (2025-10-02)
+## [0.0.4a1](https://github.com/TigreGotico/mwl_phonemizer/tree/0.0.4a1) (2025-10-03)
 
-[Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/0.0.2...0.0.3a1)
+[Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/0.0.3...0.0.4a1)
 
 **Merged pull requests:**
 
-- Espeak + CRF [\#1](https://github.com/TigreGotico/mwl_phonemizer/pull/1) ([JarbasAl](https://github.com/JarbasAl))
+- CRFOrthoCorrector [\#3](https://github.com/TigreGotico/mwl_phonemizer/pull/3) ([JarbasAl](https://github.com/JarbasAl))
 
 
 
