@@ -15,12 +15,12 @@ This repository contains a Python-based Mirandese phonemizer, designed to conver
 * **Proto-Romance -mn-:** Converts -mn- to /m/.
 * **Output Customization:** Options to keep or remove optional phonemes (in parentheses) and stress marks/syllable dots.
 
----
+-----
 
 ## **Usage**
 
 ```python
-from mwl_phonemizer.crf_espeak_mwl import CRFEspeakCorrector
+from mwl_phonemizer import CRFOrthoCorrector
 
 
 sample_texts = [
@@ -28,16 +28,10 @@ sample_texts = [
     "Todos ls seres houmanos nácen lhibres i eiguales an honra i an dreitos. Dotados de rezon i de cuncéncia, dében de se dar bien uns culs outros i cumo armano",
 ]
 
-phonemizer = CRFEspeakCorrector()
+phonemizer = CRFOrthoCorrector()
 for text in sample_texts:
     print(f"Original: {text}")
     print(f"Phonemized: {phonemizer.phonemize_sentence(text)}\n")
-    
-# Original: Muitas lhénguas ténen proua de ls sous pergaminos antigos, de la lhiteratura screbida hai cientos d'anhos i de scritores hai muito afamados, hoije bandeiras dessas lhénguas. Mas outras hai que nun puoden tener proua de nada desso, cumo ye l causo de la lhéngua mirandesa.
-# Phonemized: mujtɐs̺ ʎenɡɐs̺ tenɛ̃ pɾowuɐ dɛ ls̺ sowus̺ pɛɾɡɐminos̺ ɐntiɡos̺, dɛ ʎɐ ʎitɛɾɐtuɾɐ s̺kɾβdɐ aj s̻iɛntos̻ d'ɐnos̺ i dɛ s̺kɾitoɾɛs̺ aj mujtu ɐfɐmðs̺, owiʒɛ bɐndɛjɾɐs̺ dɛʃsɐs̺ ʎenɡɐs̺. mɐs̺ owutrɐs̺ aj kʷɛ nũ puð̃ tɨˈneɾ pɾowuɐ dɛ nð dɛʃsu, kumu ˈje l̩ kawzu dɛ ʎɐ ˈʎɛ̃ɡwɐ miɾɐndɛzɐ.
-
-# Original: Todos ls seres houmanos nácen lhibres i eiguales an honra i an dreitos. Dotados de rezon i de cuncéncia, dében de se dar bien uns culs outros i cumo armano
-# Phonemized: tðs̺ ls̺ sɛɾɛs̺ owumɐnos̺ nazɛ̃ ʎibrɛs̺ i ɛjɡɐlɛs̺ ɐ̃ onrɐ i ɐ̃ dɾɛjtos̺. dotðs̺ dɛ rɛzõ i dɛ kuns̻ens̻iɐ, dβ̃ dɛ sɛ dɐɾ biɛ̃ uns̺ kuls̺ owutros̺ i kumu ɐɾmɐnu
 ```
 
 ### **Helper Functions**
@@ -63,16 +57,17 @@ print(f"Stress-Agnostic IPA: {stress_agnostic_ipa}")
 
 ## **Phonemizer Comparison**
 
-| Phonemizer            | PER (Full IPA, Stress) | PER (Stress-Agnostic) | Words Incorrect (ED>0) | Notes                                                     |
-|-----------------------|------------------------|-----------------------|------------------------|-----------------------------------------------------------|
-| **Espeak + CRF**      | 59.98% → 3.72%         | 39.51% → 4.26%        | 35                     | Espeak output corrected with a CRF model                  |
-| **Epitran + CRF**     | 51.37% → 16.54%        | 44.89% → 18.97%       | 110                    | Epitran output corrected with a CRF model                 |
-| **CRF**               | 15.36%                 | 17.06%                | 117                    | Character-level CRF trained on aligned word–phoneme pairs |
-| **Orthography Rules** | 39.04%                 | 31.99%                | 136                    | Hand-crafted orthographic rules                           |
-| **Epitran + Rules**   | 51.37% → 47.26%        | 44.89% → 40.07%       | 137                    | Epitran output corrected with hand-crafted rules          |
-| **Espeak + Rules**    | 59.98% → 52.35%        | 39.51% → 30.30%       | 73                     | Espeak output corrected with hand-crafted rules           |
-| **N-gram (n=4)**      | 43.93%                 | 30.98%                | 141                    | Statistical N-gram model for G2P conversion               |
-| **Character lookup**  | 43.84%                 | 36.92%                | 142                    | Simple letter/digraph to phoneme lookup table             |
+| Phonemizer                  | PER (Full IPA, Stress) | PER (Stress-Agnostic) | Words Incorrect (ED>0) | Notes                                                             |
+|-----------------------------|------------------------|-----------------------|------------------------|-------------------------------------------------------------------|
+| **Character lookup**        | 45.47%                 | 38.66%                | 174                    | Simple letter/digraph to phoneme lookup table                     |
+| **N-gram (n=4)**            | 44.13%                 | 30.98%                | 173                    | Statistical N-gram model for G2P conversion                       |
+| **Orthography Rules**       | 35.86%                 | 27.91%                | 166                    | Hand-crafted orthographic rules                                   |
+| **Orthography Rules + CRF** | 14.97%                 | 2.53%                 | 161                    | Hand-crafted orthographic rules output corrected with a CRF model |
+| **CRF**                     | 20.25%                 | 8.58%                 | 164                    | Character-level CRF trained on aligned word–phoneme pairs         |
+| **Espeak + CRF**            | 61.39% → 11.82%        | 40.92% → 7.41%        | 103                    | Espeak output corrected with a CRF model                          |
+| **Epitran + CRF**           | 51.14% → 20.25%        | 44.63% → 8.58%        | 164                    | Epitran output corrected with a CRF model                         |
+| **Epitran + Rules**         | 51.14% → 47.68%        | 44.63% → 40.56%       | 169                    | Epitran output corrected with hand-crafted rules                  |
+| **Espeak + Rules**          | 61.39% → 53.35%        | 40.92% → 32.07%       | 174                    | Espeak output corrected with hand-crafted rules                   |
 
 **Notes:**
 
@@ -80,6 +75,7 @@ print(f"Stress-Agnostic IPA: {stress_agnostic_ipa}")
 - **PER (Phoneme Error Rate)** measures the proportion of phonemes differing from the gold standard IPA transcription.
 - **Stress-Agnostic PER** ignores stress marks.
 - **lower PER does not necessarily mean a better phonemizer**
+- CRF models are **overfitted** due to small data size
 
 ---
 
