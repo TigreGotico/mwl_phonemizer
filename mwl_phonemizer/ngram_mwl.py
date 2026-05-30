@@ -165,13 +165,9 @@ if __name__ == "__main__":
 
     stats = pho.evaluate_on_gold(limit=None, detailed=False, show_changes=False)
 
-    # --- Compute PER (Phoneme Error Rate) ---  # TODO - move this to evaluate_on_gold
-    total_ref_len_stress = sum(len(v) for v in pho.GOLD.values())
-    total_ref_len_no_stress = sum(len(pho.strip_stress(v)) for v in pho.GOLD.values())
-
-    per = stats['avg_edit_distance'] * stats['counts'] / total_ref_len_stress
-
-    per_no_stress = stats['avg_edit_distance_no_stress'] * stats['counts'] / total_ref_len_no_stress
+    # PER is computed inside evaluate_on_gold (see base.MirandesePhonemizer).
+    per = stats['per']
+    per_no_stress = stats['per_no_stress']
 
     # --- Print Summary Metrics ---
     print("\n" + "=" * 50)

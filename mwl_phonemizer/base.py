@@ -100,12 +100,21 @@ class MirandesePhonemizer:
                     "ed": ed_after,
                 })
 
+        # Phoneme Error Rate: total edit distance over total reference length.
+        total_ref_len = sum(len(g) for _, g in pairs)
+        total_ref_len_no_stress = sum(len(self.strip_stress(g)) for _, g in pairs)
+
         result = {
             # Standard Metrics
             "avg_edit_distance": total_ed_after / cnt if cnt else 0,
 
             # Stress-Agnostic Metrics
             "avg_edit_distance_no_stress": total_ed_no_stress_after / cnt if cnt else 0,
+
+            # Phoneme Error Rate (PER) — edit distance normalised by reference length
+            "per": total_ed_after / total_ref_len if total_ref_len else 0,
+            "per_no_stress": (total_ed_no_stress_after / total_ref_len_no_stress
+                              if total_ref_len_no_stress else 0),
 
             "counts": cnt,
             "improvements": improvements,

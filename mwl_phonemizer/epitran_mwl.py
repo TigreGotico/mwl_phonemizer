@@ -172,6 +172,9 @@ class EpitranMWL(MirandesePhonemizer):
                     "ed_after": ed_after,
                 })
 
+        total_ref_len = sum(len(g) for _, g in pairs)
+        total_ref_len_no_stress = sum(len(self.strip_stress(g)) for _, g in pairs)
+
         result = {
             # Standard Metrics
             "avg_edit_distance_before": total_ed_before / cnt if cnt else 0,
@@ -180,6 +183,14 @@ class EpitranMWL(MirandesePhonemizer):
             # Stress-Agnostic Metrics
             "avg_edit_distance_no_stress_before": total_ed_no_stress_before / cnt if cnt else 0,
             "avg_edit_distance_no_stress_after": total_ed_no_stress_after / cnt if cnt else 0,
+
+            # Phoneme Error Rate (PER) — edit distance normalised by reference length
+            "per_before": total_ed_before / total_ref_len if total_ref_len else 0,
+            "per_after": total_ed_after / total_ref_len if total_ref_len else 0,
+            "per_no_stress_before": (total_ed_no_stress_before / total_ref_len_no_stress
+                                     if total_ref_len_no_stress else 0),
+            "per_no_stress_after": (total_ed_no_stress_after / total_ref_len_no_stress
+                                    if total_ref_len_no_stress else 0),
 
             "counts": cnt,
             "improvements": improvements,
@@ -194,15 +205,11 @@ if __name__ == "__main__":
     pho = EpitranMWL("/run/media/miro/endeavouros/PycharmProjects/mwl_phonemizer/mwl_phonemizer/central.json")
     stats = pho.evaluate_against_base(limit=None, detailed=False, show_changes=False)
 
-    # --- Compute PER (Phoneme Error Rate) ---  # TODO - move this to evaluate_on_gold
-    total_ref_len_stress = sum(len(v) for v in pho.GOLD.values())
-    total_ref_len_no_stress = sum(len(pho.strip_stress(v)) for v in pho.GOLD.values())
-
-    per_before = stats['avg_edit_distance_before'] * stats['counts'] / total_ref_len_stress
-    per_after = stats['avg_edit_distance_after'] * stats['counts'] / total_ref_len_stress
-
-    per_no_stress_before = stats['avg_edit_distance_no_stress_before'] * stats['counts'] / total_ref_len_no_stress
-    per_no_stress_after = stats['avg_edit_distance_no_stress_after'] * stats['counts'] / total_ref_len_no_stress
+    # PER is computed inside evaluate_against_base (before/after correction).
+    per_before = stats['per_before']
+    per_after = stats['per_after']
+    per_no_stress_before = stats['per_no_stress_before']
+    per_no_stress_after = stats['per_no_stress_after']
 
     # --- Print Summary Metrics ---
     print("\n" + "=" * 50)
