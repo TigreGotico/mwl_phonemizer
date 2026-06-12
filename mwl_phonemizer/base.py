@@ -1,10 +1,14 @@
-import abc
 import json
 import re
 import os
 from collections import Counter
+from typing import List, Optional
 import editdistance
 from enum import Enum
+
+import orthography2ipa
+from orthography2ipa.g2p_plugin import G2PPlugin, WordContext
+
 
 class Dialects(str, Enum):
     CENTRAL = "central"
@@ -12,7 +16,44 @@ class Dialects(str, Enum):
     SENDINESE = "sendinese"
 
 
-class MirandesePhonemizer:
+# ---------------------------------------------------------------------------
+# Dialect ↔ orthography2ipa spec mapping
+# ---------------------------------------------------------------------------
+# CENTRAL and RAIANO both map to "mwl" (the base Mirandese spec).
+# A dedicated "mwl-x-raiano" spec does not yet exist in orthography2ipa;
+# the mapping will be updated once M0 seeds that dialect upstream.
+# SENDINESE maps to "mwl-x-sendim" (Miranda do Douro / Sendim sub-variety).
+DIALECT_TO_SPEC_CODE: dict = {
+    Dialects.CENTRAL: "mwl",
+    Dialects.RAIANO: "mwl",      # no mwl-x-raiano spec yet; falls back to base
+    Dialects.SENDINESE: "mwl-x-sendim",
+}
+
+
+def spec_for(dialect: Dialects):
+    """Return the ``orthography2ipa`` LanguageSpec for *dialect*.
+
+    RAIANO resolves to the base ``mwl`` spec because a dedicated
+    ``mwl-x-raiano`` entry has not yet been seeded upstream (Phase M0).
+    """
+    code = DIALECT_TO_SPEC_CODE[dialect]
+    return orthography2ipa.get(code)
+
+
+# ---------------------------------------------------------------------------
+# Base phonemizer — implements the shared G2PPlugin interface
+# ---------------------------------------------------------------------------
+
+class MirandesePhonemizer(G2PPlugin):
+    """Mirandese G2P base class.
+
+    Implements the shared :class:`orthography2ipa.g2p_plugin.G2PPlugin`
+    interface so all eight concrete backends gain conformance for free.
+    The existing public API (``phonemize`` / ``phonemize_sentence``) is
+    preserved unchanged; ``transcribe`` and ``transcribe_word`` are thin
+    wrappers that delegate to it.
+    """
+
     def __init__(self,
                  gold_dict: str | None = None,
                  raiano_dict: str | None = None,   # dialect exceptions
@@ -31,6 +72,37 @@ class MirandesePhonemizer:
             self.RAIANO_GOLD = {k: self.strip_markers(v) for k, v in json.load(f).items()}
         with open(sendinese_dict, "r", encoding="utf-8") as f:
             self.SENDINESE_GOLD = {k: self.strip_markers(v) for k, v in json.load(f).items()}
+
+    # ------------------------------------------------------------------
+    # G2PPlugin interface
+    # ------------------------------------------------------------------
+
+    @property
+    def language_codes(self) -> List[str]:
+        """BCP-47 codes handled by this instance.
+
+        Always includes ``"mwl"`` (base Mirandese).  When the instance is
+        configured for a dialect that has a distinct private-use sub-tag
+        (currently only SENDINESE → ``"mwl-x-sendim"``) that code is
+        appended as well.
+        """
+        codes = ["mwl"]
+        dialect_code = DIALECT_TO_SPEC_CODE.get(self.dialect)
+        if dialect_code and dialect_code != "mwl":
+            codes.append(dialect_code)
+        return codes
+
+    def transcribe(self, text: str) -> str:
+        """Transcribe a full sentence to IPA.  Delegates to ``phonemize_sentence``."""
+        return self.phonemize_sentence(text)
+
+    def transcribe_word(self, word: str, context: Optional[WordContext] = None) -> str:
+        """Transcribe a single word to IPA.  Delegates to ``phonemize``."""
+        return self.phonemize(word)
+
+    # ------------------------------------------------------------------
+    # Original public API (unchanged)
+    # ------------------------------------------------------------------
 
     def phonemize(self, word: str, lookup_word: bool = True) -> str:
         if lookup_word and word.lower() in self.GOLD:
@@ -121,4 +193,3 @@ class MirandesePhonemizer:
             "details": details
         }
         return result
-
