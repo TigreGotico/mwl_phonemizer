@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.0a1](https://github.com/TigreGotico/mwl_phonemizer/tree/0.1.0a1) (2026-06-12)
+
+[Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/0.0.5a1...0.1.0a1)
+
+**Merged pull requests:**
+
+- feat: implement the shared G2PPlugin interface and a spec differential audit [\#9](https://github.com/TigreGotico/mwl_phonemizer/pull/9) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.0.5a1](https://github.com/TigreGotico/mwl_phonemizer/tree/0.0.5a1) (2026-05-30)
 
 [Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/0.0.4...0.0.5a1)
