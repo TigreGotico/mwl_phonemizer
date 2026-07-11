@@ -15,7 +15,7 @@ dependencies = [
     "sklearn_crfsuite",
     "editdistance",
     "joblib",
-    "orthography2ipa>=0.3.0a1",
+    "orthography2ipa>=1.71.0a1",
 ]
 keywords = ["mirandese", "mwl", "phonemizer", "g2p", "ipa", "tts"]
 classifiers = [
