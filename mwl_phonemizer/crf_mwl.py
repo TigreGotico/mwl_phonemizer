@@ -1,10 +1,13 @@
+import os
 import random
 
-from mwl_phonemizer.base import MirandesePhonemizer, Dialects
+from mwl_phonemizer.base import MirandesePhonemizer, Dialects, DIALECT_TO_SPEC_CODE
 import sklearn_crfsuite
 from rapidfuzz.distance import Levenshtein
 from enum import Enum
 import joblib
+
+from orthography2ipa import G2P
 
 
 class AlignmentStrategy(str, Enum):
@@ -76,7 +79,81 @@ def align_pad(ipa_seq: str, gold_seq: str):
     return ipa_aligned, gd_aligned
 
 
+def align_gold_to_graphemes(top1_seq: list[str], gold_ipa: str) -> list[str]:
+    """Distribute a gold IPA string over o2i grapheme slots, 1:1.
+
+    ``orthography2ipa`` tokenizes a word into maximal-munch **graphemes**
+    (``lh``, ``gu``, ``ie`` … are single tokens) and, per grapheme, offers a
+    top-1 IPA guess. To train a CRF whose feature sequence is per-grapheme,
+    the gold IPA labels must line up with that grapheme sequence — one label
+    per grapheme, not per raw character.
+
+    This aligner concatenates the per-grapheme top-1 guesses into a single
+    predicted IPA string (remembering which grapheme owns each predicted
+    character), then char-aligns that prediction to the gold IPA with
+    rapidfuzz Levenshtein ``opcodes``. Every gold character is attributed to
+    the grapheme that owns the predicted character it aligns to; gold
+    characters with no predicted counterpart (insertions) attach to the
+    preceding grapheme. The alignment is monotonic, so the returned labels —
+    one per grapheme, each a possibly multi-character or empty IPA string —
+    concatenate back to the gold IPA and line up 1:1 with the o2i feature
+    sequence.
+    """
+    n = len(top1_seq)
+    labels = ["" for _ in range(n)]
+    if n == 0:
+        return labels
+
+    pred_chars: list[str] = []
+    owner: list[int] = []
+    for gi, ipa in enumerate(top1_seq):
+        for ch in ipa:
+            pred_chars.append(ch)
+            owner.append(gi)
+
+    gold_chars = list(gold_ipa)
+    if not pred_chars:
+        # no grapheme offered any IPA guess; dump gold on the first slot
+        labels[0] = gold_ipa
+        return labels
+
+    for op in Levenshtein.opcodes(pred_chars, gold_chars):
+        tag, i1, i2, j1, j2 = (op.tag, op.src_start, op.src_end,
+                               op.dest_start, op.dest_end)
+        if tag in ("equal", "replace"):
+            span = i2 - i1
+            for k in range(j2 - j1):
+                pi = i1 + min(k, span - 1)
+                labels[owner[pi]] += gold_chars[j1 + k]
+        elif tag == "insert":
+            # gold char(s) with no predicted counterpart: attach to the
+            # preceding grapheme (or the first slot at word start)
+            oi = owner[i1 - 1] if i1 > 0 else owner[0]
+            for k in range(j1, j2):
+                labels[oi] += gold_chars[k]
+        # "delete": predicted char absent from gold -> nothing to assign
+    return labels
+
+
 class CRFPhonemizer(MirandesePhonemizer):
+    """CRF grapheme-to-phoneme backend trained on ``orthography2ipa`` features.
+
+    The feature sequence is the linguistically-grounded per-grapheme feature
+    export from ``G2P(spec).features(word)`` (phonological-class predicates,
+    word-local grapheme neighbours, the ranked candidate lattice's top-1/cost,
+    per-word confidence …) instead of a hand-rolled ±3 character window. Gold
+    IPA labels are aligned to that grapheme tokenization via
+    :func:`align_gold_to_graphemes`, so labels line up 1:1 with the features.
+
+    Subclasses that feed the CRF something other than orthographic Mirandese
+    text (e.g. an IPA→IPA corrector) select ``feature_backend="char"`` to fall
+    back to the character-window features + Levenshtein label alignment.
+    """
+
+    #: "o2i" -> per-grapheme features from orthography2ipa (default);
+    #: "char" -> character-window features + char-level Levenshtein alignment.
+    feature_backend = "o2i"
+
     def __init__(self, crf_model_path: str | None = None,
                  strategy=AlignmentStrategy.LEV,
                  algorithm='lbfgs',
@@ -99,12 +176,41 @@ class CRFPhonemizer(MirandesePhonemizer):
         self.manual_fixes = apply_manual_fixes
         self.model = None
         self.ignore_stress = ignore_stress
+        self._g2p = None
         if crf_model_path and os.path.exists(crf_model_path):
             self.load_model(crf_model_path)
         elif train_data:
             self.train_crf(train_data)
         else:
             self.train_on_gold()
+
+    # ------------------------------------------------------------------
+    # orthography2ipa feature export
+    # ------------------------------------------------------------------
+    def _o2i(self) -> G2P:
+        """Return (and cache) the ``G2P`` engine for this instance's spec."""
+        if self._g2p is None:
+            code = DIALECT_TO_SPEC_CODE.get(self.dialect, "mwl")
+            self._g2p = G2P(code)
+        return self._g2p
+
+    def _grapheme_records(self, text: str):
+        """Per-grapheme o2i feature dicts + top-1 IPA guesses for *text*.
+
+        Returns ``(features, top1)`` where ``features`` is the CRF feature
+        sequence (one flat, scalar, ``None``-free dict per grapheme) and
+        ``top1`` is the parallel list of per-grapheme top-1 IPA guesses used
+        for gold-label alignment.
+        """
+        features: list[dict] = []
+        top1: list[str] = []
+        for wf in self._o2i().features(text):
+            for d in wf.as_dicts():
+                top1.append(d.get("top1_ipa") or "")
+                # crfsuite feature values must be str/bool/int/float, not None
+                features.append({k: ("" if v is None else v)
+                                 for k, v in d.items()})
+        return features, top1
 
     def train_on_gold(self):
         # Prepare training data from GOLD dictionary
@@ -162,7 +268,22 @@ class CRFPhonemizer(MirandesePhonemizer):
         return fixed_phonemes
 
     def extract_features(self, str_input):
-        # Simple character-level features for CRF
+        """Feature sequence for one input token.
+
+        With ``feature_backend == "o2i"`` (default) this returns the
+        per-grapheme ``orthography2ipa`` feature dicts for *str_input*. With
+        ``"char"`` it returns the legacy per-character ±3 window features
+        (used by IPA→IPA corrector subclasses whose input is not orthographic
+        Mirandese text).
+        """
+        if self.feature_backend == "o2i":
+            features, _ = self._grapheme_records(str_input)
+            return features
+        return self._extract_char_features(str_input)
+
+    @staticmethod
+    def _extract_char_features(str_input):
+        # Simple character-level ±3 window features for CRF.
         features = []
         for i, char in enumerate(str_input):
             feats = {
@@ -188,12 +309,23 @@ class CRFPhonemizer(MirandesePhonemizer):
             if self.ignore_stress:
                 str_input = self.strip_stress(str_input)
                 gold_ipa = self.strip_stress(gold_ipa)
-            if self.strategy == AlignmentStrategy.LEV:
-                ipa_aligned, gold_aligned = align_with_lev(str_input, gold_ipa)
+
+            if self.feature_backend == "o2i":
+                # features + labels both keyed on the o2i grapheme tokens
+                feats, top1 = self._grapheme_records(str_input)
+                if not feats:
+                    continue
+                labels = align_gold_to_graphemes(top1, gold_ipa)
+                X.append(feats)
+                y.append(labels)
             else:
-                ipa_aligned, gold_aligned = align_pad(str_input, gold_ipa)
-            X.append(self.extract_features(ipa_aligned))
-            y.append(gold_aligned)
+                # legacy char-window path (IPA->IPA corrector subclasses)
+                if self.strategy == AlignmentStrategy.LEV:
+                    ipa_aligned, gold_aligned = align_with_lev(str_input, gold_ipa)
+                else:
+                    ipa_aligned, gold_aligned = align_pad(str_input, gold_ipa)
+                X.append(self._extract_char_features(ipa_aligned))
+                y.append(gold_aligned)
 
         self.model = sklearn_crfsuite.CRF(
             algorithm=self.algorithm,
@@ -219,6 +351,8 @@ class CRFPhonemizer(MirandesePhonemizer):
             raise ValueError("CRF model is not trained or loaded.")
         tx_word = self.grapheme_transforms(word)
         features = self.extract_features(tx_word)
+        if not features:
+            return ""
         pred = self.model.predict_single(features)
         phones = ''.join(pred)
         return self._postprocess(word, phones)

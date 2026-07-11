@@ -3,6 +3,11 @@ from mwl_phonemizer.orthography_hand_rules import OrthographyRulesMWL
 
 
 class CRFOrthoCorrector(CRFPhonemizer):
+    # This backend feeds the CRF orthography-rules IPA output (not orthographic
+    # Mirandese text), so the o2i grapheme feature export does not apply; it
+    # keeps the character-window features + Levenshtein label alignment.
+    feature_backend = "char"
+
     def __init__(self, *args, **kwargs):
         self.phonemizer = OrthographyRulesMWL()
         DATASET = [(self.phonemizer.phonemize(word, lookup_word=False), gold)
