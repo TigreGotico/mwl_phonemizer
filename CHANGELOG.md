@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.1a1](https://github.com/TigreGotico/mwl_phonemizer/tree/0.1.1a1) (2026-07-11)
+
+[Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/0.1.0a1...0.1.1a1)
+
+**Merged pull requests:**
+
+- fix\(license\): replace GPL python-Levenshtein with MIT rapidfuzz [\#12](https://github.com/TigreGotico/mwl_phonemizer/pull/12) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.1.0a1](https://github.com/TigreGotico/mwl_phonemizer/tree/0.1.0a1) (2026-06-12)
 
 [Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/0.0.5a1...0.1.0a1)
