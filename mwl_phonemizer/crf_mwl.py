@@ -2,7 +2,7 @@ import random
 
 from mwl_phonemizer.base import MirandesePhonemizer, Dialects
 import sklearn_crfsuite
-import Levenshtein as lev
+from rapidfuzz.distance import Levenshtein
 from enum import Enum
 import joblib
 
@@ -21,7 +21,7 @@ def align_with_lev(espeak_seq: str, gold_seq: str):
     es = list(espeak_seq)
     gd = list(gold_seq)
 
-    ops = lev.editops(es, gd)
+    ops = [(e.tag, e.src_pos, e.dest_pos) for e in Levenshtein.editops(es, gd)]
     es_aligned, gd_aligned = [], []
     i, j = 0, 0
 
