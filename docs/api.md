@@ -112,6 +112,12 @@ Hand-crafted orthographic and phonological rules (lenition, sibilant variation,
 Latin cluster evolution, palatalization). `keep_optional_phones` keeps phones the
 rules mark as optional (in parentheses); `keep_stress_marks` keeps `ˈ`/`ˌ`.
 
+Grapheme segmentation is delegated to the shared
+`orthography2ipa.phonetok.PhonetokTokenizer` (a maximal-munch trie over the
+Mirandese grapheme set) and the realisation rules run as an
+`orthography2ipa.rescorer.LatticeRescorer` over the resulting per-grapheme
+lattice — there is no private tokenizer or hand-rolled index arithmetic.
+
 ```python
 OrthographyRulesMWL().phonemize("lhéngua", lookup_word=False)   # 'ʎɛŋɡwa'
 ```

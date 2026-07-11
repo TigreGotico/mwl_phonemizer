@@ -17,6 +17,22 @@ This repository contains a Python-based Mirandese phonemizer, designed to conver
 
 -----
 
+## **Architecture**
+
+The rule-based engine (`OrthographyRulesMWL`) is built on the shared
+[orthography2ipa](https://github.com/TigreGotico/orthography2ipa) pronunciation
+lattice. Grapheme segmentation is delegated to the language-agnostic
+`orthography2ipa.phonetok.PhonetokTokenizer` (a maximal-munch trie over the
+Mirandese grapheme set declared in `g2p.json`) and every context-sensitive
+realisation rule (lenition, sibilant voicing, palatalisation, `i`/`u` glides,
+final `-o` raising, the trill/tap `r` split) runs as an
+`orthography2ipa.rescorer.LatticeRescorer` over the resulting per-grapheme
+`SegmentSlot` lattice. There is no private tokenizer and no hand-rolled index
+arithmetic — the engine shares the same segmentation substrate as every other
+orthography2ipa downstream (Barranquenho, arbtok, tugaphone).
+
+-----
+
 ## **Usage**
 
 ```python
