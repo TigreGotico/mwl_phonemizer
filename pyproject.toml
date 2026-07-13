@@ -5,17 +5,17 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "mwl_phonemizer"
 dynamic = ["version"]
-description = "Rule-based grapheme-to-phoneme phonemizer for the Mirandese language (mwl)"
+description = "Grapheme-to-phoneme phonemizer for the Mirandese language (mwl): orthography2ipa lattice base + CRF correction trained on native-speaker gold"
 readme = "README.md"
 license = { text = "Apache-2.0" }
 authors = [{ name = "JarbasAi", email = "jarbasai@mailfence.com" }]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     "rapidfuzz",
     "sklearn_crfsuite",
     "editdistance",
     "joblib",
-    "orthography2ipa>=1.72.0a1",
+    "orthography2ipa>=4.1.0a1",
 ]
 keywords = ["mirandese", "mwl", "phonemizer", "g2p", "ipa", "tts"]
 classifiers = [
@@ -26,9 +26,7 @@ classifiers = [
     "Topic :: Text Processing :: Linguistic",
 ]
 
-# The espeak backend needs a system `espeak-ng` binary on PATH (no PyPI extra).
 [project.optional-dependencies]
-epitran = ["epitran"]
 test = ["pytest"]
 
 [project.urls]
@@ -38,9 +36,6 @@ Repository = "https://github.com/TigreGotico/mwl_phonemizer"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["mwl_phonemizer*"]
-
-[tool.setuptools.package-data]
-mwl_phonemizer = ["*.json"]
 
 [tool.setuptools.dynamic]
 version = { attr = "mwl_phonemizer.version.VERSION_STR" }
