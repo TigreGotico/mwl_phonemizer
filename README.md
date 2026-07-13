@@ -77,8 +77,8 @@ print(f"Stress-Agnostic IPA: {stress_agnostic_ipa}")
 |-----------------------------|------------------------|-----------------------|------------------------|-------------------------------------------------------------------|
 | **Character lookup**        | 45.47%                 | 38.66%                | 174                    | Simple letter/digraph to phoneme lookup table                     |
 | **N-gram (n=4)**            | 44.13%                 | 30.98%                | 173                    | Statistical N-gram model for G2P conversion                       |
-| **Orthography Rules**       | 35.86%                 | 27.91%                | 166                    | Hand-crafted orthographic rules                                   |
-| **Orthography Rules + CRF** | 14.97%                 | 2.53%                 | 161                    | Hand-crafted orthographic rules output corrected with a CRF model |
+| **Orthography Rules**       | 28.61%                 | 18.16%                | 166                    | Hand-crafted orthographic rules                                   |
+| **Orthography Rules + CRF** | 16.15%                 | 3.88%                 | 161                    | Hand-crafted orthographic rules output corrected with a CRF model |
 | **CRF**                     | 13.55%                 | 0.90%                 | 161                    | CRF trained on orthography2ipa per-grapheme linguistic features   |
 | **Espeak + CRF**            | 61.39% → 11.82%        | 40.92% → 7.41%        | 103                    | Espeak output corrected with a CRF model                          |
 | **Epitran + CRF**           | 51.14% → 20.25%        | 44.63% → 8.58%        | 164                    | Epitran output corrected with a CRF model                         |

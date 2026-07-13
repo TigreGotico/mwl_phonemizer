@@ -22,9 +22,12 @@ from mwl_phonemizer.crf_ortho_mwl import CRFOrthoCorrector
 GOLD_PER_BOUNDS = {
     "lookup": (0.46, 0.39),
     "ngram": (0.45, 0.32),
-    "rules": (0.37, 0.29),
+    "rules": (0.30, 0.19),
     "crf": (0.15, 0.02),
-    "crf_ortho": (0.16, 0.04),
+    # crf_ortho retrains at init on the rules backend's output, so its
+    # full-stress PER floats slightly whenever the rules change (measured
+    # 0.1615 after the 2026-07 rules accuracy wave; stress-agnostic 0.0388).
+    "crf_ortho": (0.17, 0.04),
 }
 
 BACKENDS = {

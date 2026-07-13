@@ -184,6 +184,29 @@ class OrthographyRulesMWL(MirandesePhonemizer):
         key = tuple((g, cands[0]) for g, cands in self.MWL_ALPHABET_MAP.items())
         return _tokenizer(key)
 
+    @staticmethod
+    def _stressed_vowel_span(word: str) -> tuple:
+        """Approximate the character span of the stressed vowel group.
+
+        Convenção Ortográfica da Língua Mirandesa (1999) stress rules
+        (shared with Portuguese): words ending in a vowel (optionally +s)
+        are stressed on the penultimate syllable; words ending in any other
+        consonant are stressed on the last syllable. Orthographic accents
+        (á é í ó ú) mark irregular stress explicitly and are handled by
+        their own graphemes, so this helper is only consulted for
+        accent-less words. Returns a (start, end) char span of the stressed
+        vowel group, or (-1, -1) if the word has no vowel.
+        """
+        if re.search(r"[áéíóú]", word):
+            return (-1, -1)  # accent marks stress; not this helper's job
+        groups = [(m.start(), m.end())
+                  for m in re.finditer(r"[aeiouy]+", word)]
+        if not groups:
+            return (-1, -1)
+        if re.search(r"[aeiou]s?$", word) and len(groups) > 1:
+            return groups[-2]  # paroxytone: vowel(-s) final words
+        return groups[-1]  # oxytone: consonant-final words
+
     def _is_vowel(self, char):
         """Checks if a character is a vowel."""
         return char.lower() in self._vowels
@@ -230,6 +253,45 @@ class OrthographyRulesMWL(MirandesePhonemizer):
             elif grapheme == "l" and i == 0:  # Initial 'l' in Sendinese remains [l]
                 return self.MWL_ALPHABET_MAP["l"][0]
 
+        # Nasal vowel digraphs ⟨an/am/en/in/on/un⟩.
+        #
+        # 1. Before a vowel the ⟨n⟩ is a plain onset and the preceding vowel
+        #    stays oral: Mirandese retains intervocalic /n/ (Wikipedia,
+        #    "Mirandese language", Phonology: "Retention of intervocalic
+        #    /l/, /n/"; also Quarteu & Frías Conde 2001, "L Mirandés: Ũa
+        #    Lhéngua Minoritaira an Pertual", §2 on the conservation of
+        #    Latin -N-). E.g. ⟨paxarina⟩ → [pɐʃɐɾinɐ], not *[pɐʃɐɾĩŋɐ].
+        # 2. In coda position (before a consonant or word-finally) the vowel
+        #    nasalises. The velar appendix is *optional* — the alphabet
+        #    table gives /ɐ̃(ŋ)/, /ẽ(ŋ)/, /ĩ(ŋ)/, /õ(ŋ)/, /ũ(ŋ)/ (Wikipedia,
+        #    "Mirandese language", Orthography table, after the Convenção
+        #    Ortográfica da Língua Mirandesa 1999) — and is not realised
+        #    word-internally: ⟨brincar⟩ → [bɾĩkaɾ]. Word-finally the gold
+        #    transcriptions realise it after the high nasal vowels only
+        #    (⟨botin⟩ → [bʉtĩŋ], ⟨-un⟩ → [ũŋ]).
+        if grapheme in ("an", "am", "en", "in", "on", "un"):
+            nxt = word[i + 2] if i + 2 < len(word) else ""
+            if nxt and self._is_vowel(nxt):
+                oral = {"an": "ɐ", "am": "ɐ", "en": "ɨ",
+                        "in": "i", "on": "o", "un": "u"}[grapheme]
+                return oral + ("m" if grapheme == "am" else "n")
+            nasal = {"an": "ɐ̃", "am": "ɐ̃", "en": "ẽ",
+                     "in": "ĩ", "on": "õ", "un": "ũ"}[grapheme]
+            if i + 2 >= len(word) and grapheme in ("in", "un"):
+                return nasal + "ŋ"  # word-final velar appendix, high vowels
+            return nasal
+
+        if grapheme == "a":
+            # Rule: /a/ has allophones [ä(=a), ɐ] (Wikipedia, "Mirandese
+            # language", Vowels) distributed by stress, as in Portuguese:
+            # the open [a] in the stressed syllable, reduced [ɐ] in
+            # unstressed syllables. Stress placement follows the Convenção
+            # Ortográfica (1999) defaults (see _stressed_vowel_span).
+            s, e = self._stressed_vowel_span(word)
+            if s <= i < e:
+                return self.MWL_ALPHABET_MAP["a"][1]  # stressed [a]
+            return self.MWL_ALPHABET_MAP["a"][0]  # unstressed [ɐ]
+
         if grapheme == "b":
             # Rule: b = [β] between vowels and after voiced consonants
             if (i > 0 and self._is_vowel(word[i - 1])) and \
@@ -246,16 +308,26 @@ class OrthographyRulesMWL(MirandesePhonemizer):
             else:
                 return self.MWL_ALPHABET_MAP["c"][0]  # [k] elsewhere (first element in map)
         elif grapheme == "ç":
-            # Rule: ç = [z̻] before words starting with voiced consonants
-            # This rule is tricky without full word context (e.g., "words starting with voiced consonants")
-            # For now, a simplified interpretation: if followed by a voiced consonant within the word.
-            # A more accurate implementation would require sentence-level context.
-            if i + 1 < len(word) and self._is_voiced_consonant(word[i + 1]):
-                return self.MWL_ALPHABET_MAP["ç"][0]  # [z̻]
-            else:
-                return self.MWL_ALPHABET_MAP["ç"][0]  # Default to [z̻]
+            # Rule: ⟨ç⟩ is the *voiceless* laminal dental sibilant [s̻]: "the
+            # laminal dental sibilants correspond to Portuguese /s, z/. These
+            # are spelled c/ç and z" (Wikipedia, "Mirandese language",
+            # Consonants) — i.e. the voiceless member is ⟨c/ç⟩ and the voiced
+            # one is ⟨z⟩. The Convenção Ortográfica (1999) likewise uses ⟨ç⟩
+            # for /s/ before ⟨a, o, u⟩ and word-finally (⟨lhuç⟩ → [ʎus̻],
+            # ⟨fuorça⟩ → [fwɔɾs̻ɐ]). Voicing to [z̻] happens only in external
+            # sandhi (before a voiced-initial word), which is sentence-level
+            # context this word-scoped rule does not see.
+            return self.MWL_ALPHABET_MAP["ç"][0]  # [s̻]
         elif grapheme == "d":
-            # Rule: d = [ð] between vowels and after r
+            # Rule: ⟨d⟩ is the stop [d] by default; "Voiced stops /b, d, ɡ/
+            # can be lenited as fricatives [β, ð, ɣ]" (Wikipedia, "Mirandese
+            # language", Consonants) in weak position — between vowels and
+            # after ⟨r⟩ — mirroring the ⟨b⟩/⟨g⟩ rules above/below. The
+            # alphabet table gives D = /d/, /ð/ in that order (g2p.json now
+            # matches; the map previously listed [ð] first, which inverted
+            # the rule: word-initial ⟨d⟩ came out *[ð] and intervocalic ⟨d⟩
+            # came out *[d]).
+            # d = [ð] between vowels and after r
             if (i > 0 and self._is_vowel(word[i - 1])) and \
                     (i + 1 < len(word) and self._is_vowel(word[i + 1])):
                 return self.MWL_ALPHABET_MAP["d"][1]  # [ð] between vowels
@@ -264,9 +336,18 @@ class OrthographyRulesMWL(MirandesePhonemizer):
             else:
                 return self.MWL_ALPHABET_MAP["d"][0]  # [d] otherwise
         elif grapheme == "e":
-            # Rule: e = [ɨ/ɨ̃] before stressed syllables
-            # This rule requires stress prediction, which is beyond this rule-based phonemizer.
-            # Defaulting to the first phoneme [e].
+            # Rule: words ending in ⟨-r⟩ are stressed on the last syllable
+            # (Convenção Ortográfica da Língua Mirandesa 1999, acentuação:
+            # oxytone stress for consonant-final words, as in Portuguese),
+            # and stressed /e/ is realised [e] while the reduced [ɨ]
+            # allophone belongs to unstressed syllables (Wikipedia,
+            # "Mirandese language", Vowels: /e/ has allophones [ɛ, e, ɨ]).
+            # So ⟨e⟩ in a word-final ⟨-er⟩ (infinitives ⟨chober⟩, ⟨haber⟩)
+            # is the stressed close-mid [e].
+            if i + 2 == len(word) and word[i + 1].lower() == "r":
+                return self.MWL_ALPHABET_MAP["e"][1]  # stressed [e]
+            # Elsewhere stress prediction is beyond this rule-based
+            # phonemizer; default to the reduced first candidate [ɨ].
             return self.MWL_ALPHABET_MAP["e"][0]
         elif grapheme == "g":
             # Rule: g = [ɣ] between vowels and after r. Before e and i, g = [ʒ].
