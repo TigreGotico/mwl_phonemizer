@@ -1,75 +1,134 @@
-from mwl_phonemizer.crf_mwl import  CRFPhonemizer
-from mwl_phonemizer.epitran_mwl import EpitranMWL
-from mwl_phonemizer.espeak_mwl import EspeakMWL
-from mwl_phonemizer.ngram_mwl import NgramMWLPhonemizer
-from mwl_phonemizer.orthography_hand_rules import OrthographyRulesMWL
-from mwl_phonemizer.crf_espeak_mwl import CRFEspeakCorrector
-from mwl_phonemizer.crf_epitran_mwl import CRFEpitranCorrector
-from mwl_phonemizer.crf_ortho_mwl import CRFOrthoCorrector
-from mwl_phonemizer.char_lookup_mwl import LookupTableMWL
+"""Mirandese (mwl) grapheme-to-phoneme conversion.
+
+Architecture: the base transcription comes from the ``orthography2ipa``
+Mirandese pronunciation lattice (``G2P("mwl")`` and dialect specs), and a
+linear-chain CRF trained on native-speaker gold pronunciations corrects the
+lattice output. Words present in the gold dictionary are returned verbatim.
+
+Quickstart::
+
+    from mwl_phonemizer import MirandesePhonemizer
+
+    pho = MirandesePhonemizer(dialect="mwl")
+    pho.phonemize("lhéngua")            # single word
+    pho.phonemize("Falo la lhéngua mirandesa.")  # full text
+
+or the module-level convenience::
+
+    from mwl_phonemizer import phonemize
+    phonemize("lhéngua")
+"""
+
+import re
+from functools import lru_cache
+from typing import List, Optional
+
+from orthography2ipa import G2P
+from orthography2ipa.g2p_plugin import G2PPlugin, WordContext
+
+from mwl_phonemizer.crf import CRFCorrector, strip_stress
+from mwl_phonemizer.gold import GOLD, CENTRAL, SENDINESE, RAIANO
+
+#: orthography2ipa spec codes with a Mirandese language spec
+DIALECTS = ("mwl", "mwl-x-sendim", "mwl-x-ifanes")
 
 
+def strip_markers(ipa: str) -> str:
+    """Drop syllable dots and optional-phoneme parentheses from *ipa*."""
+    return ipa.replace(".", "").replace("(", "").replace(")", "")
 
-if __name__ == "__main__":
-    sample_texts = [
-        "Muitas lhénguas ténen proua de ls sous pergaminos antigos, de la lhiteratura screbida hai cientos d'anhos i de scritores hai muito afamados, hoije bandeiras dessas lhénguas. Mas outras hai que nun puoden tener proua de nada desso, cumo ye l causo de la lhéngua mirandesa.",
-        "Todos ls seres houmanos nácen lhibres i eiguales an honra i an dreitos. Dotados de rezon i de cuncéncia, dében de se dar bien uns culs outros i cumo armano",
-        "Hai más fuogo alhá, i ye deimingo!",
-        """Quien dirie qu'antre ls matos eiriçados
-    Las ourriêtas i ls rius d'esta tiêrra,
-    Bibie, cumo l chaugarço de la siêrra,
-    Ua lhéngua de sons tan bariados?
 
-    Mostre-se i fale-s' essa lhéngua filha
-    D'un pobo que ten neilha l choro i l canto!
-    Nada por ciêrto mos cautiba tanto
-    Cumo la form' an que l'eideia brilha.
+class MirandesePhonemizer(G2PPlugin):
+    """Mirandese G2P: gold-dictionary lookup, o2i lattice base, CRF correction.
 
-    Zgraçiado d'aquel, qu'abandonando
-    La patri' an que naciu, la casa i l huôrto.
-    Tamien se squeçe de la fala! Quando
-    L furdes ber, talbéç que stéia muôrto!"""
-    ]
+    :param dialect: ``orthography2ipa`` spec code — one of :data:`DIALECTS`.
+    :param use_crf: apply the CRF correction layer to out-of-dictionary
+        words. When ``False``, out-of-dictionary words get the raw
+        ``orthography2ipa`` transcription.
+    :param crf_model_path: path to a saved CRF model. When given and the file
+        exists it is loaded; otherwise the CRF is trained on the gold
+        dictionary at construction time (fast — a few seconds) and, if a path
+        was given, saved there.
+    """
 
-    phonemizer = CRFEspeakCorrector()
-    for text in sample_texts:
-        print(f"Original: {text}")
-        print(f"Phonemized: {phonemizer.phonemize_sentence(text)}\n")
+    def __init__(self, dialect: str = "mwl",
+                 use_crf: bool = True,
+                 crf_model_path: str | None = None):
+        if dialect not in DIALECTS:
+            raise ValueError(f"unknown dialect {dialect!r}; expected one of {DIALECTS}")
+        self.dialect = dialect
+        self.g2p = G2P(dialect)
+        self.gold = {word: strip_markers(ipa)
+                     for word, ipa in GOLD[dialect].items()}
+        self.crf: CRFCorrector | None = None
+        if use_crf:
+            self.crf = CRFCorrector(self.g2p)
+            if crf_model_path:
+                import os
+                if os.path.exists(crf_model_path):
+                    self.crf.load(crf_model_path)
+                else:
+                    self.crf.train(list(self.gold.items()))
+                    self.crf.save(crf_model_path)
+            else:
+                self.crf.train(list(self.gold.items()))
 
-    # Original: Muitas lhénguas ténen proua de ls sous pergaminos antigos, de la lhiteratura screbida hai cientos d'anhos i de scritores hai muito afamados, hoije bandeiras dessas lhénguas. Mas outras hai que nun puoden tener proua de nada desso, cumo ye l causo de la lhéngua mirandesa.
-    # Phonemized: mujtɐs̺ ʎenɡɐs̺ tenɛ̃ pɾowuɐ dɛ ls̺ sowus̺ pɛɾɡɐminos̺ ɐntiɡos̺, dɛ ʎɐ ʎitɛɾɐtuɾɐ s̺kɾβdɐ aj s̻iɛntos̻ d'ɐnos̺ i dɛ s̺kɾitoɾɛs̺ aj mujtu ɐfɐmðs̺, owiʒɛ bɐndɛjɾɐs̺ dɛʃsɐs̺ ʎenɡɐs̺. mɐs̺ owutrɐs̺ aj kʷɛ nũ puð̃ tɨˈneɾ pɾowuɐ dɛ nð dɛʃsu, kumu ˈje l̩ kawzu dɛ ʎɐ ˈʎɛ̃ɡwɐ miɾɐndɛzɐ.
-    #
-    # Original: Todos ls seres houmanos nácen lhibres i eiguales an honra i an dreitos. Dotados de rezon i de cuncéncia, dében de se dar bien uns culs outros i cumo armano
-    # Phonemized: tðs̺ ls̺ sɛɾɛs̺ owumɐnos̺ nazɛ̃ ʎibrɛs̺ i ɛjɡɐlɛs̺ ɐ̃ onrɐ i ɐ̃ dɾɛjtos̺. dotðs̺ dɛ rɛzõ i dɛ kuns̻ens̻iɐ, dβ̃ dɛ sɛ dɐɾ biɛ̃ uns̺ kuls̺ owutros̺ i kumu ɐɾmɐnu
-    #
-    # Original: Hai más fuogo alhá, i ye deimingo!
-    # Phonemized: aj mas̺ fwoɣʊ ɐˈʎa, i ˈje dejˈmĩgʊ!
-    #
-    # Original: Quien dirie qu'antre ls matos eiriçados
-    #     Las ourriêtas i ls rius d'esta tiêrra,
-    #     Bibie, cumo l chaugarço de la siêrra,
-    #     Ua lhéngua de sons tan bariados?
-    #
-    #     Mostre-se i fale-s' essa lhéngua filha
-    #     D'un pobo que ten neilha l choro i l canto!
-    #     Nada por ciêrto mos cautiba tanto
-    #     Cumo la form' an que l'eideia brilha.
-    #
-    #     Zgraçiado d'aquel, qu'abandonando
-    #     La patri' an que naciu, la casa i l huôrto.
-    #     Tamien se squeçe de la fala! Quando
-    #     L furdes ber, talbéç que stéia muôrto!
-    # Phonemized: kʷiɛ̃ diɾiɛ k'ɐntɾɛ ls̺ mɐtos̺ ɛjɾisðs̻
-    #     ʎɐs̺ owurietɐs̺ i ls̺ riws̺ d'ɛʃtɐ tierɐ,
-    #     bβɛ, kumu l̩ kawɡɐɾsu dɛ ʎɐ s̻ierɐ,
-    #     ˈũŋɐ ˈʎɛ̃ɡwɐ dɛ sons̺ tɐ̃ bɐɾiðs̺?
-    #
-    #     moʃtɾɛ sɛ i fɐlɛ s̺̺' ɛʃsɐ ˈʎɛ̃ɡwɐ filɐ
-    #     d'ũ pβ kʷɛ tɛ̃ nɛjlɐ l̩ koɾu i l̩ kɐntu!
-    #     nð poɾ s̻ieɾtu mos̺ kawtβ tɐntu
-    #     kumu ʎɐ foɾ' ɐ̃ kʷɛ l̩'ɛjdɛjɐ bɾilɐ.
-    #
-    #     zɡɾɐs̻ið d'ɐkʷɛl, k'βndonɐndu
-    #     ʎɐ pɐtri' ɐ̃ kʷɛ nɐziw, ʎɐ kɐzɐ i l̩ uoɾtu.
-    #     tɐˈmjẽ sɛ s̻kʷɛsɛ dɛ ʎɐ fɐlɐ! ˈkwɐ̃du
-    #     l̩ fuɾdɛs̺ bɛɾ, tɐlbes kʷɛ s̺tejɐ muoɾtu!
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
+
+    def phonemize(self, text: str, lookup: bool = True) -> str:
+        """IPA for *text* — a single word or a full sentence.
+
+        Words (and multi-word expressions) found in the gold dictionary are
+        returned verbatim when *lookup* is true; everything else goes through
+        the o2i lattice plus, when enabled, the CRF corrector. Punctuation
+        and whitespace are preserved.
+        """
+        text = text.strip()
+        if lookup and text.lower() in self.gold:
+            return self.gold[text.lower()]
+        parts = re.findall(r"[^\W\d_]+|[\W\d_]+", text.replace("-", " "))
+        out = []
+        for part in parts:
+            if part.isalpha():
+                out.append(self.phonemize_word(part, lookup=lookup))
+            else:
+                out.append(part)
+        return "".join(out)
+
+    def phonemize_word(self, word: str, lookup: bool = True) -> str:
+        """IPA for a single *word*."""
+        word = word.lower().strip()
+        if lookup and word in self.gold:
+            return self.gold[word]
+        if self.crf is not None:
+            return self.crf.predict(word)
+        return self.g2p.transcribe_word(word)
+
+    # ------------------------------------------------------------------
+    # orthography2ipa G2PPlugin interface
+    # ------------------------------------------------------------------
+
+    @property
+    def language_codes(self) -> List[str]:
+        codes = ["mwl"]
+        if self.dialect != "mwl":
+            codes.append(self.dialect)
+        return codes
+
+    def transcribe(self, text: str) -> str:
+        return self.phonemize(text)
+
+    def transcribe_word(self, word: str, context: Optional[WordContext] = None) -> str:
+        return self.phonemize_word(word)
+
+
+@lru_cache(maxsize=None)
+def _default_phonemizer(dialect: str) -> MirandesePhonemizer:
+    return MirandesePhonemizer(dialect=dialect)
+
+
+def phonemize(text: str, dialect: str = "mwl") -> str:
+    """IPA for *text* using a cached default :class:`MirandesePhonemizer`."""
+    return _default_phonemizer(dialect).phonemize(text)
