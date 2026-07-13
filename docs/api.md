@@ -143,9 +143,35 @@ CRFPhonemizer(
 )
 ```
 
-Character-level CRF over aligned `(input, gold)` pairs. On construction it loads
-`crf_model_path` if the file exists, else trains on `train_data` if given, else
-trains on `self.GOLD`. Useful methods:
+CRF over `(input, gold)` pairs. On construction it loads `crf_model_path` if the
+file exists, else trains on `train_data` if given, else trains on `self.GOLD`.
+
+**Features (`feature_backend = "o2i"`, the default).** The CRF trains on the
+per-grapheme *linguistic* feature export from `orthography2ipa`
+(`G2P(spec).features(word)`, PR #260) — phonological-class predicates
+(`is_vowel`/`is_consonant`/`is_front`/`is_back`), word-local grapheme neighbours
+(`prev`/`next`/`prev2`/`next2`), the ranked candidate lattice's top-1 IPA and
+cost, the top-1/2 `margin`, `n_candidates`, and the per-word `confidence` signal
+— instead of a hand-rolled ±3 character window. The `G2P` engine is cached per
+instance and keyed on the dialect's spec code.
+
+**Grapheme alignment (the crux).** o2i tokenizes a word into maximal-munch
+*graphemes* (`lh`, `gu`, `ie` … are single tokens), so the feature sequence is
+per-grapheme. The gold IPA labels must line up 1:1 with it.
+`align_gold_to_graphemes(top1_seq, gold_ipa)` concatenates the per-grapheme
+top-1 IPA guesses into a predicted string (tracking which grapheme owns each
+predicted char), char-aligns that prediction to the gold IPA with rapidfuzz
+Levenshtein `opcodes`, and attributes every gold char to the owning grapheme
+(insertions attach to the preceding grapheme). It returns one label per
+grapheme — possibly multi-character (`ie → jɛ`) or empty — that concatenates
+back to the gold IPA.
+
+Subclasses whose CRF input is *not* orthographic Mirandese text (e.g. the
+IPA→IPA `CRFOrthoCorrector`) set `feature_backend = "char"` to fall back to the
+legacy per-character ±3 window features with char-level Levenshtein/pad label
+alignment.
+
+Useful methods:
 
 ```python
 train_crf(train_data: list[tuple[str, str]]) -> None
@@ -154,9 +180,10 @@ load_model(path: str) -> None
 grapheme_transforms(str_input: str) -> str   # override hook; identity by default
 ```
 
-`AlignmentStrategy` is a `str` enum with `PAD` and `LEV`. Module-level helpers
-`align_with_lev(a, b)` and `align_pad(a, b)` return two equal-length lists with
-gaps marked `.`.
+`AlignmentStrategy` is a `str` enum with `PAD` and `LEV` (used by the `"char"`
+backend). Module-level helpers `align_with_lev(a, b)` / `align_pad(a, b)` return
+two equal-length lists with gaps marked `.`; `align_gold_to_graphemes(top1, gold)`
+returns one IPA label per o2i grapheme.
 
 ### `CRFOrthoCorrector`
 
