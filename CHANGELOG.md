@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.0a2](https://github.com/TigreGotico/mwl_phonemizer/tree/1.0.0a2) (2026-07-14)
+
+[Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/1.0.0a1...1.0.0a2)
+
+**Merged pull requests:**
+
+- chore: Configure Renovate [\#5](https://github.com/TigreGotico/mwl_phonemizer/pull/5) ([renovate[bot]](https://github.com/apps/renovate))
+
 ## [1.0.0a1](https://github.com/TigreGotico/mwl_phonemizer/tree/1.0.0a1) (2026-07-13)
 
 [Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/0.2.0a1...1.0.0a1)
