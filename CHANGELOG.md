@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.0a3](https://github.com/TigreGotico/mwl_phonemizer/tree/1.0.0a3) (2026-07-14)
+
+[Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/1.0.0a2...1.0.0a3)
+
+**Merged pull requests:**
+
+- refactor: stop subclassing G2PPlugin — it was never a plugin [\#21](https://github.com/TigreGotico/mwl_phonemizer/pull/21) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [1.0.0a2](https://github.com/TigreGotico/mwl_phonemizer/tree/1.0.0a2) (2026-07-14)
 
 [Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/1.0.0a1...1.0.0a2)
