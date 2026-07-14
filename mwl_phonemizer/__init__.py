@@ -24,7 +24,7 @@ from functools import lru_cache
 from typing import List, Optional
 
 from orthography2ipa import G2P
-from orthography2ipa.g2p_plugin import G2PPlugin, WordContext
+from orthography2ipa import WordContext
 
 from mwl_phonemizer.crf import CRFCorrector, strip_stress
 from mwl_phonemizer.gold import GOLD, CENTRAL, SENDINESE, RAIANO
@@ -38,7 +38,7 @@ def strip_markers(ipa: str) -> str:
     return ipa.replace(".", "").replace("(", "").replace(")", "")
 
 
-class MirandesePhonemizer(G2PPlugin):
+class MirandesePhonemizer:
     """Mirandese G2P: gold-dictionary lookup, o2i lattice base, CRF correction.
 
     :param dialect: ``orthography2ipa`` spec code — one of :data:`DIALECTS`.
@@ -107,7 +107,8 @@ class MirandesePhonemizer(G2PPlugin):
         return self.g2p.transcribe_word(word)
 
     # ------------------------------------------------------------------
-    # orthography2ipa G2PPlugin interface
+    # The surface downstream code relies on. mwl_phonemizer is an engine built
+    # ON orthography2ipa, not a plugin to it — nothing there discovers or calls it.
     # ------------------------------------------------------------------
 
     @property

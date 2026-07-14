@@ -1,7 +1,6 @@
 """Tests for the public MirandesePhonemizer API."""
 import pytest
 
-from orthography2ipa.g2p_plugin import G2PPlugin
 
 from mwl_phonemizer import (DIALECTS, MirandesePhonemizer, phonemize,
                             strip_markers, strip_stress)
@@ -68,8 +67,11 @@ def test_no_crf_falls_back_to_o2i_base():
     assert base.phonemize_word("fui", lookup=False) == "ˈfuj"
 
 
-def test_g2p_plugin_interface(pho):
-    assert isinstance(pho, G2PPlugin)
+def test_g2p_engine_surface(pho):
+    # An engine built ON orthography2ipa, not a plugin TO it — nothing there
+    # discovers or calls this. The surface is what matters, not inheritance.
+    for method in ("transcribe", "transcribe_word"):
+        assert callable(getattr(pho, method))
     assert pho.language_codes == ["mwl"]
     word = "lhéngua"
     assert pho.transcribe(word) == pho.phonemize(word)
