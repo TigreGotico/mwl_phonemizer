@@ -41,6 +41,7 @@ from orthography2ipa import WordContext
 
 from mwl_phonemizer.crf import CRFCorrector, strip_stress
 from mwl_phonemizer.gold import GOLD, CENTRAL, SENDINESE, RAIANO
+from mwl_phonemizer.number_utils import normalize_numbers, MirandeseNumberParser
 
 #: orthography2ipa spec codes with a Mirandese language spec
 DIALECTS = ("mwl", "mwl-x-sendim", "mwl-x-ifanes")
@@ -101,7 +102,8 @@ class MirandesePhonemizer:
     # Public API
     # ------------------------------------------------------------------
 
-    def phonemize(self, text: str, lookup: bool = False) -> str:
+    def phonemize(self, text: str, lookup: bool = False,
+                  expand_numbers: bool = True) -> str:
         """IPA for *text* — a single word or a full sentence.
 
         Each letter run is transcribed by the ``orthography2ipa`` engine as a
@@ -111,8 +113,16 @@ class MirandesePhonemizer:
         returned verbatim instead, and any phrase containing such a word is done
         word-by-word so the overlay wins (this trades the engine's phrase-level
         sandhi for the overlay's per-word transcriptions).
+
+        When *expand_numbers* is true (the default), numeric tokens are spelled
+        out into Mirandese words by :func:`~mwl_phonemizer.number_utils.normalize_numbers`
+        *before* the lattice runs — the normalizer stage — so the spelled-out
+        words are transcribed with the engine's own sandhi and stress. Pass
+        ``expand_numbers=False`` to leave digits untouched.
         """
         text = text.strip()
+        if expand_numbers:
+            text = normalize_numbers(text, self.dialect)
         if lookup and text.lower() in self.gold:
             return self.gold[text.lower()]
         out = []
