@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.0.0a2](https://github.com/TigreGotico/mwl_phonemizer/tree/2.0.0a2) (2026-07-16)
+
+[Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/2.0.0a1...2.0.0a2)
+
+**Merged pull requests:**
+
+- docs: human-gold accuracy, retire circular sentence-gold 0.00% claim [\#25](https://github.com/TigreGotico/mwl_phonemizer/pull/25) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [2.0.0a1](https://github.com/TigreGotico/mwl_phonemizer/tree/2.0.0a1) (2026-07-16)
 
 [Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/1.0.0a3...2.0.0a1)
