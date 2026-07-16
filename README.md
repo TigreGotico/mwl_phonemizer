@@ -60,6 +60,42 @@ The `dialect` argument is an `orthography2ipa` Mirandese spec code:
 MirandesePhonemizer("mwl-x-sendim").phonemize("lhobo")   # 'ˈloβu', not 'ˈʎobu'
 ```
 
+### Numbers
+
+Digits carry no orthography the lattice can read, so numeric tokens are spelled
+out into Mirandese words *before* transcription — the normalizer stage. This is
+on by default in `phonemize`; pass `expand_numbers=False` to leave digits as-is.
+
+```python
+from mwl_phonemizer import MirandesePhonemizer
+from mwl_phonemizer.number_utils import normalize_numbers, MirandeseNumberParser
+
+pho = MirandesePhonemizer("mwl")
+pho.phonemize("tengo 2 gatos")                 # 2 -> 'dous', then transcribed
+pho.phonemize("tengo 2 gatos", expand_numbers=False)   # digit left untouched
+
+# spell numbers to text without phonemizing
+normalize_numbers("tengo 21 anhos")            # 'tengo binte i un anhos'
+normalize_numbers("la casa 5ª")                # 'la casa quinta'  (º masc / ª fem)
+
+# the verbaliser directly
+p = MirandeseNumberParser("mwl")
+p.cardinal(256)                # 'duzentos i cincoenta i seis'
+p.cardinal(2, "feminine")      # 'dues'
+p.ordinal(1, "feminine")       # 'purmeira'
+p.pronounce_token("3,5")       # 'trés bírgula cinco'
+MirandeseNumberParser("mwl-x-sendim").cardinal(7)   # 'site'  (central 'siête')
+```
+
+Numeral groups join with the copulative **i** ("and"). The number words are a
+source-cited table: cardinals through 500 and the tens 50–90 are attested in
+Leite de Vasconcelos, *Estudos de Philologia Mirandesa* vol. I §189
+(pp. 347–351); the hundreds 600–900 are built by the periphrastic
+`cardinal + -cientos` rule Vasconcelos states for that range (p. 349); the
+decimal word *bírgula* and the 6th/10th ordinals are reconstructed by the
+regular `v→b` / final-vowel adaptation. `number_utils.ATTESTED` and
+`number_utils.DERIVED` list which is which.
+
 ## How it works
 
 The transcription is the `orthography2ipa` Mirandese pronunciation lattice.
