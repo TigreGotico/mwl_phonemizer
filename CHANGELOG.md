@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.0.0a1](https://github.com/TigreGotico/mwl_phonemizer/tree/2.0.0a1) (2026-07-16)
+
+[Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/1.0.0a3...2.0.0a1)
+
+**Breaking changes:**
+
+- feat!: lattice-core default — pure orthography2ipa engine, lexicon/CRF opt-in [\#23](https://github.com/TigreGotico/mwl_phonemizer/pull/23) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [1.0.0a3](https://github.com/TigreGotico/mwl_phonemizer/tree/1.0.0a3) (2026-07-14)
 
 [Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/1.0.0a2...1.0.0a3)
