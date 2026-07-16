@@ -1,16 +1,18 @@
 """Phoneme Error Rate (PER) benchmarks for the Mirandese phonemizer.
 
-Two independent gold sets are scored:
+Two gold sets are scored:
 
-- **Sentence gold** (primary) — the research-grounded, blind-judge-verified
-  20-sentence sets ``orthography2ipa`` ships for ``mwl``, ``mwl-x-sendim`` and
-  ``mwl-x-ifanes`` (``data/gold/portuguese_tts/``). This is held out from
-  everything the library trains on, so it measures the deployed default
-  honestly. The sandhi-aware lattice reproduces it essentially exactly.
-- **Word dictionary** (secondary) — the ~200-word native-speaker dictionary
-  bundled in :mod:`mwl_phonemizer.gold` (Hugging Face ``mirandese_g2p``). It
-  uses a finer, different transcription convention; the optional CRF is trained
-  and scored on it.
+- **Word dictionary** (primary — the only human accuracy measurement) — the
+  ~219-word native-speaker dictionary bundled in :mod:`mwl_phonemizer.gold`
+  (Hugging Face ``mirandese_g2p``), the only human-authored Mirandese gold. It
+  uses a finer *narrow* transcription convention; the optional CRF is trained
+  and scored on it (fit-to-dictionary is a circular upper bound, 5-fold CV the
+  honest out-of-dictionary estimate).
+- **Engine sentence set** (consistency check, NOT accuracy) — the 20-sentence
+  sets ``orthography2ipa`` ships for each lect (``data/gold/portuguese_tts/``).
+  The lattice reproduces them at ~0% PER, but they were authored to match this
+  engine's output (engine-pinned), so that 0% is an internal consistency check,
+  not a measure of accuracy against human ground truth.
 
 PER = total character edit distance / total gold length on marker-stripped IPA,
 reported with stress marks ("PER") and without ("PER no-stress"). Gold lookup is
@@ -79,7 +81,7 @@ def score(predict: Callable[[str], str],
 
 
 # ---------------------------------------------------------------------------
-# Sentence gold (primary)
+# Engine sentence set (consistency check, NOT accuracy)
 # ---------------------------------------------------------------------------
 
 def load_sentence_gold(dialect: str = "mwl") -> list[tuple[str, str]]:
@@ -95,13 +97,13 @@ def load_sentence_gold(dialect: str = "mwl") -> list[tuple[str, str]]:
 
 
 def evaluate_sentences(dialect: str = "mwl") -> dict:
-    """PER of the deployed default (pure lattice) on the sentence gold."""
+    """PER on the engine-pinned sentence set (consistency check, not accuracy)."""
     pho = MirandesePhonemizer(dialect=dialect)
     return score(pho.phonemize, load_sentence_gold(dialect))
 
 
 # ---------------------------------------------------------------------------
-# Word dictionary (secondary)
+# Word dictionary (primary — the only human accuracy measurement)
 # ---------------------------------------------------------------------------
 
 def _word_pairs(dialect: str) -> list[tuple[str, str]]:
@@ -149,23 +151,26 @@ def _row(name: str, s: dict) -> None:
 
 
 def main(dialect: str = "mwl") -> None:
-    try:
-        sent = evaluate_sentences(dialect)
-        print(f"Sentence gold — dialect {dialect!r}, {sent['counts']} sentences\n")
-        print(f"{'system':<32} {'PER':>7} {'PER (no stress)':>15}")
-        print("-" * 56)
-        _row("lattice (deployed default)", sent)
-        print(f"\nsentence mismatches: {len(sent['details'])}\n")
-    except FileNotFoundError:
-        print(f"(installed orthography2ipa ships no sentence gold for {dialect!r})\n")
-
+    # PRIMARY: the only human-authored gold.
     base = evaluate_base(dialect)
-    print(f"Word dictionary — dialect {dialect!r}, {base['counts']} words\n")
+    print(f"Human word gold (mirandese_g2p) — dialect {dialect!r}, "
+          f"{base['counts']} words — the only accuracy measurement\n")
     print(f"{'system':<32} {'PER':>7} {'PER (no stress)':>15}")
     print("-" * 56)
-    _row("lattice", base)
-    _row("+ CRF (fit to dictionary)", evaluate_crf(dialect))
-    _row("+ CRF (5-fold CV)", cross_validate(dialect))
+    _row("pure lattice (default)", base)
+    _row("+ CRF (5-fold CV, honest OOD)", cross_validate(dialect))
+    _row("+ CRF (fit to dict, circular)", evaluate_crf(dialect))
+
+    # Consistency check only — engine-pinned, NOT an accuracy claim.
+    try:
+        sent = evaluate_sentences(dialect)
+        print(f"\nEngine sentence set — {sent['counts']} sentences "
+              f"(engine-pinned consistency check, NOT accuracy)\n")
+        print(f"{'system':<32} {'PER':>7} {'PER (no stress)':>15}")
+        print("-" * 56)
+        _row("lattice", sent)
+    except FileNotFoundError:
+        print(f"\n(installed orthography2ipa ships no sentence set for {dialect!r})")
 
 
 if __name__ == "__main__":
