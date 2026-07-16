@@ -95,38 +95,63 @@ two opt-in layers:
 Phoneme Error Rate (PER = character edit distance / gold length), gold lookup
 disabled so the numbers reflect the model.
 
-### Sentence gold (primary)
+### Human gold — the only accuracy measurement (primary)
 
-The research-grounded, blind-judge-verified 20-sentence sets `orthography2ipa`
-ships for each lect. These are held out from everything the library trains on.
-The deployed default reproduces them segment-for-segment:
+The **only** human-authored Mirandese gold is the 219-word native-speaker
+dictionary [`TigreGotico/mirandese_g2p`](https://huggingface.co/datasets/TigreGotico/mirandese_g2p)
+(central 206, sendinese 11, raiano 2; rows routed to `mwl` / `mwl-x-sendim` /
+`mwl-x-ifanes` by their dialect tag). Everything below is scored against it,
+full dataset, no caps. Three normalisations are reported:
 
-| lect | sentences | PER | PER (stress-agnostic) |
-|------|-----------|-----|-----------------------|
-| `mwl` | 20 | **0.00%** | **0.00%** |
-| `mwl-x-sendim` | 20 | **0.00%** | **0.00%** |
-| `mwl-x-ifanes` | 20 | **0.00%** | **0.00%** |
+- **strict** — only structural markers (syllable dots, optional-phoneme
+  parentheses) removed; stress and every diacritic count.
+- **folded** — additionally folds three documented notation conventions:
+  stress marks (`ˈ ˌ`), length (`ː`), and tie-bars (`t͡ʃ`→`tʃ`).
+- **broad** — additionally folds the documented *broad-vs-narrow* gap: the
+  human gold is a **narrow** transcription, this engine is **broad-phonemic**.
+  Folds centralised `ʉ ʊ`→`u`, spirant `ð`→`d`, dark `ɫ`→`l`, lowered `e̞`→`e`,
+  and the apical/laminal sibilant diacritics (`s̺ s̻`→`s`). What remains is the
+  residual *true* phonemic error, not convention distance.
 
-### Word dictionary (secondary)
+| system | strict | folded | broad |
+|--------|-------:|-------:|------:|
+| **pure lattice** (deployed default) | 22.23% | 19.50% | **13.10%** |
+| + CRF, 5-fold cross-validated (honest OOD) | 21.18% | 18.16% | 12.73% |
+| + CRF, fit to dictionary (circular upper bound) | 8.79% | 3.83% | 2.59% |
+| lexicon lookup (`lookup=True`, memorisation) | 0.25% | 0.28% | 0.30% |
 
-The ~205-word native-speaker dictionary, in its own finer convention. Because
-that convention differs from the sentence gold, PER against it is a measure of
-convention distance, not of engine error:
+Reading the table honestly:
 
-| system | PER | PER (stress-agnostic) |
-|--------|-----|-----------------------|
-| lattice | 22.33% | 19.60% |
-| + CRF, fit to dictionary | 6.99% | 1.92% |
-| + CRF, 5-fold cross-validated | 21.49% | 18.79% |
+- **Lexicon lookup ≈ 0%** is pure memorisation — the lexicon *is* this gold, so
+  every word is returned verbatim. It is not an accuracy signal, and it mixes
+  the narrow lexicon convention into otherwise-broad sentences, which is why it
+  is off by default.
+- **CRF fit-to-dictionary (3.83% folded)** is trained and scored on the same
+  words — a circular upper bound, not accuracy.
+- **CRF 5-fold CV (18.16% folded)** is the honest out-of-dictionary estimate.
+  It edges the lattice by ~1.3pp folded, but on the convention-neutral **broad**
+  basis the gap collapses to 0.37pp (12.73% vs 13.10%): almost all of the CRF's
+  apparent gain is matching the lexicon's narrow convention, not fixing real
+  errors — and it couples every output to that convention. Hence the **pure
+  lattice remains the default**: convention-neutral, deterministic, untrained,
+  and statistically tied with the CRF on true phonemic error.
 
-The CRF fit-to-dictionary figure is an upper bound (trained and scored on the
-same words); cross-validation estimates unseen-word performance. Reproduce
-either table with:
+Reproduce with:
 
 ```bash
 python -m mwl_phonemizer.evaluate                # dialect mwl
 python -m mwl_phonemizer.evaluate mwl-x-sendim
 ```
+
+### Engine sentence set — a consistency check, NOT an accuracy claim
+
+`orthography2ipa` also ships 20-sentence sets per lect
+(`mwl`/`mwl-x-sendim`/`mwl-x-ifanes`). The lattice reproduces them at ~0% PER —
+but those sentences were **authored to match this engine's own output** (they
+are engine-pinned), so that 0% is an internal consistency check, **not** a
+measure of accuracy against human ground truth. Earlier versions of this README
+(and two downstream dataset cards) presented that 0% as the primary accuracy
+figure; that was circular. The human-gold table above is the real measurement.
 
 ## License
 

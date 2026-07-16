@@ -7,12 +7,16 @@ This library is a thin Mirandese-facing wrapper over that engine; it adds only
 what o2i does not: dialect selection, an optional native-speaker lexicon
 overlay returned verbatim, and punctuation-preserving text handling.
 
-On the research-grounded Mirandese gold (``orthography2ipa`` ships the 20-row
-blind-judge sets ``mwl``/``mwl-x-sendim``/``mwl-x-ifanes``) the sandhi-aware
-lattice reproduces every sentence exactly, so it is the default. An optional
-CRF corrector (:mod:`mwl_phonemizer.crf`) trained on the Hugging Face word
-dictionary is available but off by default — it is tuned to that dictionary's
-transcription convention and moves output away from the research gold.
+Default rationale: against the only human-authored Mirandese gold — the 219-word
+``TigreGotico/mirandese_g2p`` dictionary — the pure lattice scores 19.50% PER
+(folded) / 13.10% once the documented broad-vs-narrow notation gap is folded out.
+An optional CRF corrector (:mod:`mwl_phonemizer.crf`) trained on that dictionary
+edges the lattice on folded PER, but on the convention-neutral basis the gap is
+~0.4pp: the CRF mostly matches the lexicon's narrow convention rather than fixing
+real errors, and couples every output to it. So the convention-neutral, untrained
+lattice is the default; the CRF and lexicon lookup are opt-in. (The o2i-shipped
+20-sentence sets, which the lattice reproduces at ~0% PER, are engine-pinned —
+a consistency check, not an accuracy measurement.) See the README accuracy table.
 
 Quickstart::
 
