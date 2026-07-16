@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.1.0a2](https://github.com/TigreGotico/mwl_phonemizer/tree/2.1.0a2) (2026-07-16)
+
+[Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/2.1.0a1...2.1.0a2)
+
+**Merged pull requests:**
+
+- test: update stale coda-liquid stress pin [\#31](https://github.com/TigreGotico/mwl_phonemizer/pull/31) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [2.1.0a1](https://github.com/TigreGotico/mwl_phonemizer/tree/2.1.0a1) (2026-07-16)
 
 [Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/2.0.0a3...2.1.0a1)
