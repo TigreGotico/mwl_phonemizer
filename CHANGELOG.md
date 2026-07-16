@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.1.0a1](https://github.com/TigreGotico/mwl_phonemizer/tree/2.1.0a1) (2026-07-16)
+
+[Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/2.0.0a3...2.1.0a1)
+
+**Merged pull requests:**
+
+- feat: number expansion before the lattice \(Mirandese numerals\) [\#29](https://github.com/TigreGotico/mwl_phonemizer/pull/29) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [2.0.0a3](https://github.com/TigreGotico/mwl_phonemizer/tree/2.0.0a3) (2026-07-16)
 
 [Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/2.0.0a2...2.0.0a3)
