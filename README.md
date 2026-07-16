@@ -115,7 +115,7 @@ full dataset, no caps. Three normalisations are reported:
 
 | system | strict | folded | broad |
 |--------|-------:|-------:|------:|
-| **pure lattice** (deployed default) | 22.23% | 19.50% | **13.10%** |
+| **pure lattice** (deployed default) | 20.68% | 18.01% | **11.62%** |
 | + CRF, 5-fold cross-validated (honest OOD) | 21.18% | 18.16% | 12.73% |
 | + CRF, fit to dictionary (circular upper bound) | 8.79% | 3.83% | 2.59% |
 | lexicon lookup (`lookup=True`, memorisation) | 0.25% | 0.28% | 0.30% |
@@ -130,7 +130,7 @@ Reading the table honestly:
   words — a circular upper bound, not accuracy.
 - **CRF 5-fold CV (18.16% folded)** is the honest out-of-dictionary estimate.
   It edges the lattice by ~1.3pp folded, but on the convention-neutral **broad**
-  basis the gap collapses to 0.37pp (12.73% vs 13.10%): almost all of the CRF's
+  basis the gap collapses to 0.37pp (12.73% vs 11.62%): almost all of the CRF's
   apparent gain is matching the lexicon's narrow convention, not fixing real
   errors — and it couples every output to that convention. Hence the **pure
   lattice remains the default**: convention-neutral, deterministic, untrained,
