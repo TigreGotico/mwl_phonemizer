@@ -79,7 +79,7 @@ def test_sentence_preserves_punctuation(pho):
 def test_no_crf_falls_back_to_o2i_base():
     base = MirandesePhonemizer(dialect="mwl", use_crf=False)
     assert base.crf is None
-    assert base.phonemize_word("amportante") == "ɐ̃puˈɾtɐ̃tɨ"
+    assert base.phonemize_word("amportante") == "ɐ̃puɾˈtɐ̃tɨ"
     assert base.phonemize_word("fui") == "ˈfuj"
 
 
