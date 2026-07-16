@@ -1,9 +1,18 @@
 """Mirandese (mwl) grapheme-to-phoneme conversion.
 
-Architecture: the base transcription comes from the ``orthography2ipa``
-Mirandese pronunciation lattice (``G2P("mwl")`` and dialect specs), and a
-linear-chain CRF trained on native-speaker gold pronunciations corrects the
-lattice output. Words present in the gold dictionary are returned verbatim.
+Architecture: the transcription is the ``orthography2ipa`` Mirandese
+pronunciation lattice (``G2P("mwl")`` and its dialect specs), which owns the
+Mirandese phonology — grapheme rules, allophony, cross-word sandhi and stress.
+This library is a thin Mirandese-facing wrapper over that engine; it adds only
+what o2i does not: dialect selection, an optional native-speaker lexicon
+overlay returned verbatim, and punctuation-preserving text handling.
+
+On the research-grounded Mirandese gold (``orthography2ipa`` ships the 20-row
+blind-judge sets ``mwl``/``mwl-x-sendim``/``mwl-x-ifanes``) the sandhi-aware
+lattice reproduces every sentence exactly, so it is the default. An optional
+CRF corrector (:mod:`mwl_phonemizer.crf`) trained on the Hugging Face word
+dictionary is available but off by default — it is tuned to that dictionary's
+transcription convention and moves output away from the research gold.
 
 Quickstart::
 
@@ -11,7 +20,7 @@ Quickstart::
 
     pho = MirandesePhonemizer(dialect="mwl")
     pho.phonemize("lhéngua")            # single word
-    pho.phonemize("Falo la lhéngua mirandesa.")  # full text
+    pho.phonemize("Falo la lhéngua mirandesa.")  # full text, sandhi + stress
 
 or the module-level convenience::
 
@@ -32,6 +41,11 @@ from mwl_phonemizer.gold import GOLD, CENTRAL, SENDINESE, RAIANO
 #: orthography2ipa spec codes with a Mirandese language spec
 DIALECTS = ("mwl", "mwl-x-sendim", "mwl-x-ifanes")
 
+#: a run of letters with internal spaces/apostrophes — a phrase the o2i engine
+#: can transcribe with cross-word sandhi; everything else (punctuation, digits)
+#: is preserved verbatim.
+_PHRASE = re.compile(r"[^\W\d_](?:[ '’]?[^\W\d_])*")
+
 
 def strip_markers(ipa: str) -> str:
     """Drop syllable dots and optional-phoneme parentheses from *ipa*."""
@@ -39,20 +53,26 @@ def strip_markers(ipa: str) -> str:
 
 
 class MirandesePhonemizer:
-    """Mirandese G2P: gold-dictionary lookup, o2i lattice base, CRF correction.
+    """Mirandese G2P over the ``orthography2ipa`` lattice.
+
+    The lattice engine does the phonology; this class layers dialect selection,
+    an optional native-speaker lexicon overlay (exact words returned verbatim)
+    and optional CRF correction on top, and preserves punctuation in text.
 
     :param dialect: ``orthography2ipa`` spec code — one of :data:`DIALECTS`.
-    :param use_crf: apply the CRF correction layer to out-of-dictionary
-        words. When ``False``, out-of-dictionary words get the raw
-        ``orthography2ipa`` transcription.
-    :param crf_model_path: path to a saved CRF model. When given and the file
-        exists it is loaded; otherwise the CRF is trained on the gold
-        dictionary at construction time (fast — a few seconds) and, if a path
-        was given, saved there.
+    :param use_crf: when true, correct out-of-lexicon words with a CRF trained
+        on the bundled word dictionary. Off by default: on the research gold the
+        raw lattice is exact and the CRF, tuned to the word dictionary's
+        convention, only diverges from it. Kept for reproducibility and for
+        callers whose target matches that convention.
+    :param crf_model_path: path to a saved CRF model, used only when
+        ``use_crf`` is true. When the file exists it is loaded; otherwise the
+        CRF is trained on the lexicon at construction (a few seconds) and, if a
+        path was given, saved there.
     """
 
     def __init__(self, dialect: str = "mwl",
-                 use_crf: bool = True,
+                 use_crf: bool = False,
                  crf_model_path: str | None = None):
         if dialect not in DIALECTS:
             raise ValueError(f"unknown dialect {dialect!r}; expected one of {DIALECTS}")
@@ -77,28 +97,48 @@ class MirandesePhonemizer:
     # Public API
     # ------------------------------------------------------------------
 
-    def phonemize(self, text: str, lookup: bool = True) -> str:
+    def phonemize(self, text: str, lookup: bool = False) -> str:
         """IPA for *text* — a single word or a full sentence.
 
-        Words (and multi-word expressions) found in the gold dictionary are
-        returned verbatim when *lookup* is true; everything else goes through
-        the o2i lattice plus, when enabled, the CRF corrector. Punctuation
-        and whitespace are preserved.
+        Each letter run is transcribed by the ``orthography2ipa`` engine as a
+        whole phrase, so its cross-word sandhi and stress apply; punctuation and
+        whitespace are preserved between runs. When *lookup* is true, words and
+        multi-word expressions present in the native-speaker lexicon overlay are
+        returned verbatim instead, and any phrase containing such a word is done
+        word-by-word so the overlay wins (this trades the engine's phrase-level
+        sandhi for the overlay's per-word transcriptions).
         """
         text = text.strip()
         if lookup and text.lower() in self.gold:
             return self.gold[text.lower()]
-        parts = re.findall(r"[^\W\d_]+|[\W\d_]+", text.replace("-", " "))
         out = []
-        for part in parts:
-            if part.isalpha():
-                out.append(self.phonemize_word(part, lookup=lookup))
-            else:
-                out.append(part)
+        pos = 0
+        for m in _PHRASE.finditer(text):
+            out.append(text[pos:m.start()])
+            out.append(self._phonemize_phrase(m.group(), lookup=lookup))
+            pos = m.end()
+        out.append(text[pos:])
         return "".join(out)
 
-    def phonemize_word(self, word: str, lookup: bool = True) -> str:
-        """IPA for a single *word*."""
+    def _phonemize_phrase(self, phrase: str, lookup: bool) -> str:
+        """Transcribe one letter run, honouring the lexicon overlay."""
+        if lookup and phrase.lower() in self.gold:
+            return self.gold[phrase.lower()]
+        words = phrase.split()
+        # A lexicon hit or the CRF needs the per-word path; otherwise let the
+        # engine transcribe the whole phrase so sandhi crosses word gaps.
+        if self.crf is None and not (
+                lookup and any(w.lower() in self.gold for w in words)):
+            return self.g2p.transcribe(phrase)
+        return " ".join(self.phonemize_word(w, lookup=lookup) for w in words)
+
+    def phonemize_word(self, word: str, lookup: bool = False) -> str:
+        """IPA for a single *word*.
+
+        The raw ``orthography2ipa`` lattice transcription, unless *lookup* is
+        true and the word is in the native-speaker lexicon overlay, or the CRF
+        corrector is enabled.
+        """
         word = word.lower().strip()
         if lookup and word in self.gold:
             return self.gold[word]
@@ -107,8 +147,9 @@ class MirandesePhonemizer:
         return self.g2p.transcribe_word(word)
 
     # ------------------------------------------------------------------
-    # The surface downstream code relies on. mwl_phonemizer is an engine built
-    # ON orthography2ipa, not a plugin to it — nothing there discovers or calls it.
+    # Engine surface the downstream code relies on. mwl_phonemizer is an engine
+    # built ON orthography2ipa, not a plugin to it — nothing there discovers or
+    # calls it.
     # ------------------------------------------------------------------
 
     @property
