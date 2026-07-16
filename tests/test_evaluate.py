@@ -5,8 +5,33 @@ passing, a regression fails CI. Tighten them when an improvement lands.
 """
 import pytest
 
+from mwl_phonemizer import DIALECTS
 from mwl_phonemizer.evaluate import (cross_validate, evaluate_base,
-                                     evaluate_crf, score)
+                                     evaluate_crf, evaluate_sentences,
+                                     load_sentence_gold, score)
+
+
+@pytest.mark.parametrize("dialect", DIALECTS)
+def test_sentence_gold_is_exact(dialect):
+    # the deployed default (pure lattice) reproduces the research-grounded
+    # sentence gold segment-for-segment on every lect
+    try:
+        s = evaluate_sentences(dialect)
+    except FileNotFoundError:
+        pytest.skip(f"installed orthography2ipa ships no sentence gold for {dialect}")
+    assert s["counts"] == 20
+    assert s["per"] == 0.0
+    assert s["per_no_stress"] == 0.0
+    assert s["details"] == []
+
+
+def test_load_sentence_gold_shape():
+    try:
+        pairs = load_sentence_gold("mwl")
+    except FileNotFoundError:
+        pytest.skip("installed orthography2ipa ships no sentence gold for mwl")
+    assert len(pairs) == 20
+    assert all(isinstance(s, str) and isinstance(ipa, str) for s, ipa in pairs)
 
 
 @pytest.fixture(scope="module")
