@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.1.0a3](https://github.com/TigreGotico/mwl_phonemizer/tree/2.1.0a3) (2026-07-30)
+
+[Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/2.1.0a2...2.1.0a3)
+
+**Merged pull requests:**
+
+- docs: rewrite README in Simplified Technical English [\#33](https://github.com/TigreGotico/mwl_phonemizer/pull/33) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [2.1.0a2](https://github.com/TigreGotico/mwl_phonemizer/tree/2.1.0a2) (2026-07-16)
 
 [Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/2.1.0a1...2.1.0a2)
