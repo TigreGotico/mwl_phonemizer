@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.1.0a4](https://github.com/TigreGotico/mwl_phonemizer/tree/2.1.0a4) (2026-08-02)
+
+[Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/2.1.0a3...2.1.0a4)
+
+**Merged pull requests:**
+
+- build: raise orthography2ipa floor to 7.44.0a4 [\#35](https://github.com/TigreGotico/mwl_phonemizer/pull/35) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [2.1.0a3](https://github.com/TigreGotico/mwl_phonemizer/tree/2.1.0a3) (2026-07-30)
 
 [Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/2.1.0a2...2.1.0a3)
