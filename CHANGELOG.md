@@ -1,12 +1,124 @@
 # Changelog
 
-## [0.0.4a1](https://github.com/TigreGotico/mwl_phonemizer/tree/0.0.4a1) (2025-10-03)
+## [2.1.0a4](https://github.com/TigreGotico/mwl_phonemizer/tree/2.1.0a4) (2026-08-02)
 
-[Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/0.0.3...0.0.4a1)
+[Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/2.1.0a3...2.1.0a4)
 
 **Merged pull requests:**
 
-- CRFOrthoCorrector [\#3](https://github.com/TigreGotico/mwl_phonemizer/pull/3) ([JarbasAl](https://github.com/JarbasAl))
+- build: raise orthography2ipa floor to 7.44.0a4 [\#35](https://github.com/TigreGotico/mwl_phonemizer/pull/35) ([JarbasAl](https://github.com/JarbasAl))
+
+## [2.1.0a3](https://github.com/TigreGotico/mwl_phonemizer/tree/2.1.0a3) (2026-07-30)
+
+[Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/2.1.0a2...2.1.0a3)
+
+**Merged pull requests:**
+
+- docs: rewrite README in Simplified Technical English [\#33](https://github.com/TigreGotico/mwl_phonemizer/pull/33) ([JarbasAl](https://github.com/JarbasAl))
+
+## [2.1.0a2](https://github.com/TigreGotico/mwl_phonemizer/tree/2.1.0a2) (2026-07-16)
+
+[Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/2.1.0a1...2.1.0a2)
+
+**Merged pull requests:**
+
+- test: update stale coda-liquid stress pin [\#31](https://github.com/TigreGotico/mwl_phonemizer/pull/31) ([JarbasAl](https://github.com/JarbasAl))
+
+## [2.1.0a1](https://github.com/TigreGotico/mwl_phonemizer/tree/2.1.0a1) (2026-07-16)
+
+[Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/2.0.0a3...2.1.0a1)
+
+**Merged pull requests:**
+
+- feat: number expansion before the lattice \(Mirandese numerals\) [\#29](https://github.com/TigreGotico/mwl_phonemizer/pull/29) ([JarbasAl](https://github.com/JarbasAl))
+
+## [2.0.0a3](https://github.com/TigreGotico/mwl_phonemizer/tree/2.0.0a3) (2026-07-16)
+
+[Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/2.0.0a2...2.0.0a3)
+
+**Merged pull requests:**
+
+- docs: refresh human-gold PER figures [\#27](https://github.com/TigreGotico/mwl_phonemizer/pull/27) ([JarbasAl](https://github.com/JarbasAl))
+
+## [2.0.0a2](https://github.com/TigreGotico/mwl_phonemizer/tree/2.0.0a2) (2026-07-16)
+
+[Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/2.0.0a1...2.0.0a2)
+
+**Merged pull requests:**
+
+- docs: human-gold accuracy, retire circular sentence-gold 0.00% claim [\#25](https://github.com/TigreGotico/mwl_phonemizer/pull/25) ([JarbasAl](https://github.com/JarbasAl))
+
+## [2.0.0a1](https://github.com/TigreGotico/mwl_phonemizer/tree/2.0.0a1) (2026-07-16)
+
+[Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/1.0.0a3...2.0.0a1)
+
+**Breaking changes:**
+
+- feat!: lattice-core default — pure orthography2ipa engine, lexicon/CRF opt-in [\#23](https://github.com/TigreGotico/mwl_phonemizer/pull/23) ([JarbasAl](https://github.com/JarbasAl))
+
+## [1.0.0a3](https://github.com/TigreGotico/mwl_phonemizer/tree/1.0.0a3) (2026-07-14)
+
+[Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/1.0.0a2...1.0.0a3)
+
+**Merged pull requests:**
+
+- refactor: stop subclassing G2PPlugin — it was never a plugin [\#21](https://github.com/TigreGotico/mwl_phonemizer/pull/21) ([JarbasAl](https://github.com/JarbasAl))
+
+## [1.0.0a2](https://github.com/TigreGotico/mwl_phonemizer/tree/1.0.0a2) (2026-07-14)
+
+[Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/1.0.0a1...1.0.0a2)
+
+**Merged pull requests:**
+
+- chore: Configure Renovate [\#5](https://github.com/TigreGotico/mwl_phonemizer/pull/5) ([renovate[bot]](https://github.com/apps/renovate))
+
+## [1.0.0a1](https://github.com/TigreGotico/mwl_phonemizer/tree/1.0.0a1) (2026-07-13)
+
+[Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/0.2.0a1...1.0.0a1)
+
+**Breaking changes:**
+
+- feat!: rebuild as orthography2ipa lattice + CRF correction [\#17](https://github.com/TigreGotico/mwl_phonemizer/pull/17) ([JarbasAl](https://github.com/JarbasAl))
+
+## [0.2.0a1](https://github.com/TigreGotico/mwl_phonemizer/tree/0.2.0a1) (2026-07-13)
+
+[Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/0.1.1a2...0.2.0a1)
+
+**Merged pull requests:**
+
+- feat: train CRF backend on o2i feature-export API \(F4 pilot\) [\#15](https://github.com/TigreGotico/mwl_phonemizer/pull/15) ([JarbasAl](https://github.com/JarbasAl))
+
+## [0.1.1a2](https://github.com/TigreGotico/mwl_phonemizer/tree/0.1.1a2) (2026-07-11)
+
+[Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/0.1.1a1...0.1.1a2)
+
+**Merged pull requests:**
+
+- refactor: build on the orthography2ipa shared lattice \(tokenizer + rescorers\) [\#11](https://github.com/TigreGotico/mwl_phonemizer/pull/11) ([JarbasAl](https://github.com/JarbasAl))
+
+## [0.1.1a1](https://github.com/TigreGotico/mwl_phonemizer/tree/0.1.1a1) (2026-07-11)
+
+[Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/0.1.0a1...0.1.1a1)
+
+**Merged pull requests:**
+
+- fix\(license\): replace GPL python-Levenshtein with MIT rapidfuzz [\#12](https://github.com/TigreGotico/mwl_phonemizer/pull/12) ([JarbasAl](https://github.com/JarbasAl))
+
+## [0.1.0a1](https://github.com/TigreGotico/mwl_phonemizer/tree/0.1.0a1) (2026-06-12)
+
+[Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/0.0.5a1...0.1.0a1)
+
+**Merged pull requests:**
+
+- feat: implement the shared G2PPlugin interface and a spec differential audit [\#9](https://github.com/TigreGotico/mwl_phonemizer/pull/9) ([JarbasAl](https://github.com/JarbasAl))
+
+## [0.0.5a1](https://github.com/TigreGotico/mwl_phonemizer/tree/0.0.5a1) (2026-05-30)
+
+[Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/0.0.4...0.0.5a1)
+
+**Merged pull requests:**
+
+- docs: add docs and runnable examples [\#6](https://github.com/TigreGotico/mwl_phonemizer/pull/6) ([JarbasAl](https://github.com/JarbasAl))
 
 
 
