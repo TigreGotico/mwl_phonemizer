@@ -80,21 +80,23 @@ normalize_numbers("la casa 5ª")                # 'la casa quinta'  (º masc / �
 
 # the verbaliser directly
 p = MirandeseNumberParser("mwl")
-p.cardinal(256)                # 'duzentos i cincoenta i seis'
+p.cardinal(256)                # 'duzientos i cincoenta i seis'
 p.cardinal(2, "feminine")      # 'dues'
-p.ordinal(1, "feminine")       # 'purmeira'
+p.ordinal(1, "feminine")       # 'prumeira'
 p.pronounce_token("3,5")       # 'trés bírgula cinco'
-MirandeseNumberParser("mwl-x-sendim").cardinal(7)   # 'site'  (central 'siête')
+MirandeseNumberParser("mwl-x-sendim").cardinal(7)   # 'site'  (central 'siete')
 ```
 
 Numeral groups join with the copulative **i** ("and"). The number words come
 from a source-cited table. Cardinals through 500 and the tens 50-90 are
-attested in Leite de Vasconcelos, *Estudos de Philologia Mirandesa* vol. I
-§189 (pp. 347-351). The hundreds 600-900 follow the periphrastic
-`cardinal + -cientos` rule Vasconcelos states for that range (p. 349). The
-decimal word *bírgula* and the 6th/10th ordinals come from the regular
-`v→b` / final-vowel adaptation. `number_utils.ATTESTED` and
-`number_utils.DERIVED` list which words fall in each group.
+printed in Leite de Vasconcelos, *Estudos de Philologia Mirandesa* vol. I
+§189 (pp. 347-348), the ordinals in §190 (p. 351). The hundreds 600-900 follow
+the periphrastic rule Vasconcelos states for that range (p. 350), which is why
+500 is *cinco cientos* and not a single word. The decimal word *bírgula* and
+the 6th/10th ordinals come from the regular `v→b` / final-vowel adaptation.
+`number_utils.ATTESTED` and `number_utils.DERIVED` list which words fall in
+each group, and `number_utils.ACCEPTED` holds real spellings the tables do not
+emit, among them Vasconcelos's own notation for the nasals (*ũ*, *ciẽ*).
 
 ## How it works
 

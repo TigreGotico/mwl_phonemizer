@@ -16,21 +16,28 @@ table plus a small recursive composer.
 
 Attestation
 -----------
-Every base word is tagged in :data:`ATTESTED` or :data:`DERIVED`:
+Every base word is tagged in :data:`ATTESTED` or :data:`DERIVED`, and
+:data:`ACCEPTED` collects spellings that are real Mirandese but are not what
+the tables emit.
 
-* **Attested** forms are spelled verbatim in Leite de Vasconcelos, *Estudos de
-  Philologia Mirandesa* vol. I, §189 (cardinals, pp. 347–351) and §190
-  (ordinals, pp. 351–352), cross-checked against the native numeral headwords
-  of ``TigreGotico/mirandese-ipa-dict-synthetic``. Vasconcelos gives the full
-  cardinal set through 500 and the tens 50–90 explicitly.
-* **Derived** forms are not spelled out in the source and are built by the rule
-  Vasconcelos himself states for the gap: *"De quatrocientos para cima, até mil,
-  os cardinaes formaram-se … periphrasticamente"* (p. 349) — i.e. the hundreds
-  600–900 follow the attested ``cardinal + -cientos`` pattern (400
-  *quatrocientos*, 500 *cincocientos*), and the scale words above *milhou*, the
-  ordinals 6th/10th and the decimal word are reconstructed by the regular
-  ``v→b`` / final-vowel adaptation. They are the engine's best reconstruction,
-  not a citation, and are marked so a reviewer can tell the two apart.
+* **Attested** forms are printed in Leite de Vasconcelos, *Estudos de Philologia
+  Mirandesa* vol. I, §189 (cardinals, pp. 347-348, with the Sendinese forms in
+  Obs. 4, p. 350) and §190 (ordinals, p. 351). Vasconcelos prints his Mirandese
+  column in his own notation: a hook under a vowel marks its aperture
+  (*siẹte*, *nọbe*), an acute or grave marks stress inside the word (*dóze*,
+  *catórze*, *úito*), ⟨ʒ⟩ stands for *z*, and a tilde or ⟨ŋ⟩ marks nasality
+  (*ũ*, *ũŋa*, *ciẽ*, *milhõu*). The tables keep his letters and drop the
+  aperture and stress marks, which are phonetic annotation rather than
+  spelling; nasality keeps its usual orthographic spelling (*un*, *ũa*,
+  *cien*, *milhou*).
+* **Derived** forms are not printed in the source and are built by the rule
+  Vasconcelos states for the gap: *"De quatrocientos para cima, até mil, os
+  cardinaes formaram-se com os recursos do próprio idioma, periphrasticamente"*
+  (p. 350). He prints 400 *quatrocientos* and 500 *cinco cientos*, so 600-900
+  follow as *cardinal + cientos*. The scale words above *milhou*, the ordinals
+  6th and 10th, and the decimal word are reconstructed by the regular ``v→b``
+  and final-vowel correspondences. They are the engine's best reconstruction,
+  not a citation.
 
 Conjunction: Mirandese joins numeral groups with the copulative **i** ("and") —
 Vasconcelos fixes this in his orthographic convention (*"Com i represento a
@@ -59,34 +66,33 @@ _MINUS_WORD = "menos"
 # gender (1 and 2 in Ibero-Romance).
 # ---------------------------------------------------------------------------
 
-#: units 0-9, masculine. ATTESTED except 0.
+#: units 0-9, masculine. ATTESTED (Vasconcelos §189 p.347) except 0.
 _UNITS_M: Dict[int, str] = {
     0: "zero",      # DERIVED (Mirandese has no distinct native zero word)
-    1: "un",        # ATTESTED
+    1: "un",        # ATTESTED as *ũ*
     2: "dous",      # ATTESTED
     3: "trés",      # ATTESTED
     4: "quatro",    # ATTESTED
     5: "cinco",     # ATTESTED
     6: "seis",      # ATTESTED
-    7: "siête",     # ATTESTED (central)
-    8: "oito",      # ATTESTED
-    9: "nuobe",     # ATTESTED (central)
+    7: "siete",     # ATTESTED
+    8: "uito",      # ATTESTED (Sendinese shares it, Obs. 4)
+    9: "nobe",      # ATTESTED (the stem of *dezanobe*, *nobenta*)
 }
 
-#: feminine overrides for the gendered units. ATTESTED.
+#: feminine overrides for the gendered units. ATTESTED §189 p.347.
 _UNITS_F: Dict[int, str] = {
-    1: "ũa",        # ATTESTED
+    1: "ũa",        # ATTESTED as *ũŋa*
     2: "dues",      # ATTESTED
 }
 
-#: 10-19. All ATTESTED (Vasconcelos §189 p.348: dezaseis, dezasiete, dezuito,
-#: dezanobe — note the reduced *-nobe* stem in compounds, not *nuobe*).
+#: 10-19. All ATTESTED (Vasconcelos §189 p.347).
 _TEENS: Dict[int, str] = {
-    10: "diêç",         # ATTESTED (central)
-    11: "ounze",        # ATTESTED
+    10: "dieç",         # ATTESTED
+    11: "onze",         # ATTESTED
     12: "doze",         # ATTESTED
     13: "treze",        # ATTESTED
-    14: "quatorze",     # ATTESTED
+    14: "catorze",      # ATTESTED
     15: "quinze",       # ATTESTED
     16: "dezaseis",     # ATTESTED (var. dezasseis)
     17: "dezasiete",    # ATTESTED (var. dezassiete)
@@ -94,7 +100,7 @@ _TEENS: Dict[int, str] = {
     19: "dezanobe",     # ATTESTED
 }
 
-#: tens 20-90. All ATTESTED (Vasconcelos §189 p.348: cincoenta, sessenta,
+#: tens 20-90. All ATTESTED (Vasconcelos §189 pp.347-348: cincoenta, sessenta,
 #: setenta, uitenta, nobenta).
 _TENS: Dict[int, str] = {
     20: "binte",        # ATTESTED
@@ -107,23 +113,24 @@ _TENS: Dict[int, str] = {
     90: "nobenta",      # ATTESTED
 }
 
-#: hundreds. 100 is *cien* (Vasconcelos p.348), used both standalone and before
-#: a remainder (*cien i cinco*). 200-500 ATTESTED (duzentos, trezentos,
-#: quatrocientos, cincocientos); 600-900 DERIVED on the attested *cardinal +
-#: -cientos* pattern (the periphrastic rule Vasconcelos states, p.349).
+#: hundreds. 100 is *cien* (Vasconcelos p.348, printed *ciẽ*), used both
+#: standalone and before a remainder (*cien i cinco*). 200-500 ATTESTED, the
+#: last two already periphrastic; 600-900 DERIVED on the same pattern
+#: (the rule Vasconcelos states, p.350).
 _HUNDRED_ONE = "cien"        # ATTESTED (100, standalone and compound head)
 _HUNDREDS: Dict[int, str] = {
-    200: "duzentos",        # ATTESTED (sendinês duzintos)
-    300: "trezentos",       # ATTESTED (sendinês trezintos)
+    200: "duzientos",       # ATTESTED (sendinês duzintos)
+    300: "trezientos",      # ATTESTED (sendinês trezintos)
     400: "quatrocientos",   # ATTESTED
-    500: "cincocientos",    # ATTESTED
-    600: "seiscientos",     # DERIVED
-    700: "siêtecientos",    # DERIVED
-    800: "oitocientos",     # DERIVED
-    900: "nuobecientos",    # DERIVED
+    500: "cinco cientos",   # ATTESTED
+    600: "seis cientos",    # DERIVED
+    700: "siete cientos",   # DERIVED
+    800: "uito cientos",    # DERIVED
+    900: "nobe cientos",    # DERIVED
 }
 
-#: scale words. *mil* and *milhou* ATTESTED (Vasconcelos p.348); the plural
+#: scale words. *mil* and *milhou* ATTESTED (Vasconcelos p.348, printing
+#: *milhõu* and calling the ending a final diphthong, §110-b); the plural
 #: *milhones* and *bilhou/bilhones* DERIVED (regular ``-ou/-ones`` reflex).
 _THOUSAND = "mil"                       # ATTESTED
 _MILLION = ("milhou", "milhones")       # milhou ATTESTED, milhones DERIVED
@@ -134,46 +141,60 @@ _BILLION = ("bilhou", "bilhones")       # DERIVED
 #: their standalone masculines are DERIVED. Vasconcelos: *"O povo faz pouco uso
 #: dos ordinaes"* — beyond ~5th these are learned.
 _ORDINALS_M: Dict[int, str] = {
-    1: "purmeiro",     # ATTESTED
+    1: "prumeiro",     # ATTESTED
     2: "segundo",      # ATTESTED
-    3: "terceiro",     # ATTESTED
+    3: "terceiro",     # ATTESTED (var. treceiro)
     4: "quarto",       # ATTESTED
     5: "quinto",       # ATTESTED
     6: "sesto",        # DERIVED (only sésta-feira attested)
     7: "sétimo",       # ATTESTED (var. sétemo)
-    8: "óutabo",       # ATTESTED (var. uitabo)
+    8: "outabo",       # ATTESTED (var. uitabo)
     9: "nono",         # ATTESTED (literary)
     10: "décimo",      # DERIVED (only décima attested)
 }
 
-#: base entries attested verbatim in Vasconcelos §189-190 / the native dict.
+#: base entries printed in Vasconcelos §189-190.
 ATTESTED = {
-    "un", "ũa", "dous", "dues", "trés", "quatro", "cinco", "seis", "siête",
-    "oito", "nuobe", "diêç", "ounze", "doze", "treze", "quatorze", "quinze",
+    "un", "ũa", "dous", "dues", "trés", "quatro", "cinco", "seis", "siete",
+    "uito", "nobe", "dieç", "onze", "doze", "treze", "catorze", "quinze",
     "dezaseis", "dezasiete", "dezuito", "dezanobe",
     "binte", "trinta", "quarenta", "cincoenta", "sessenta", "setenta",
     "uitenta", "nobenta",
-    "cien", "duzentos", "trezentos", "quatrocientos", "cincocientos",
+    "cien", "duzientos", "trezientos", "quatrocientos", "cinco cientos",
     "mil", "milhou",
-    "purmeiro", "purmeira", "segundo", "terceiro", "quarto", "quinto",
-    "sétimo", "óutabo", "nono",
-    # sendinês attested variants (Vasconcelos p.350 Obs.4)
-    "dus", "site", "nube", "uito", "deç", "duzintos", "trezintos",
+    "prumeiro", "prumeira", "segundo", "terceiro", "quarto", "quinto",
+    "sétimo", "outabo", "nono",
+    # sendinês (Vasconcelos §189 Obs. 4, p.350)
+    "dus", "site", "nube", "duzintos", "trezintos",
 }
 DERIVED = {
     "zero",
-    "seiscientos", "siêtecientos", "oitocientos", "nuobecientos",
+    "seis cientos", "siete cientos", "uito cientos", "nobe cientos",
     "milhones", "bilhou", "bilhones",
     "sesto", "décimo",
     "bírgula", "menos",
 }
 
+#: spellings a consumer should accept on input but the tables never emit:
+#: Vasconcelos's own notation for the nasals, the variants he prints beside
+#: the head form, the joined spelling of the periphrastic hundreds, and forms
+#: that appear in the Mirandese texts of vol. II.
+ACCEPTED = {
+    "ũ", "ciẽ", "milhõu",
+    "dezasseis", "dezassiete", "deziúito", "corenta", "carenta",
+    "sétemo", "uitabo", "treceiro",
+    "cincocientos", "seiscientos",
+    "purmeiro", "purmeira",   # vol. II, p.320
+    "nuobe",                  # diphthongized 9 of the modern written norm
+}
+
 #: per-dialect overrides applied on top of the central tables. Sendinês forms
-#: are ATTESTED (Vasconcelos §189 p.350, Obs. 4).
+#: are ATTESTED (Vasconcelos §189 Obs. 4, p.350). Obs. 4 names only these and
+#: says of the rest *"creio que não differem das mirandesas normaes: diz-se,
+#: por exemplo, uito"*, so 8 and 10 take the central forms.
 _DIALECT_OVERRIDES: Dict[str, Dict[str, Dict[int, str]]] = {
     "mwl-x-sendim": {
-        "units": {2: "dus", 7: "site", 8: "uito", 9: "nube"},
-        "teens": {10: "deç"},
+        "units": {2: "dus", 7: "site", 9: "nube"},
         "hundreds": {200: "duzintos", 300: "trezintos"},
     },
 }
