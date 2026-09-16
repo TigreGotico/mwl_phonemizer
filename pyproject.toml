@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mwl_phonemizer"
+dynamic = ["version"]
+description = "Grapheme-to-phoneme phonemizer for the Mirandese language (mwl): orthography2ipa lattice base + CRF correction trained on native-speaker gold"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+authors = [{ name = "JarbasAi", email = "jarbasai@mailfence.com" }]
+requires-python = ">=3.10"
+dependencies = [
+    "rapidfuzz",
+    "sklearn_crfsuite",
+    "editdistance",
+    "joblib",
+    "orthography2ipa>=7.44.0a4",
+]
+keywords = ["mirandese", "mwl", "phonemizer", "g2p", "ipa", "tts"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Text Processing :: Linguistic",
+]
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[project.urls]
+Homepage = "https://github.com/TigreGotico/mwl_phonemizer"
+Repository = "https://github.com/TigreGotico/mwl_phonemizer"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["mwl_phonemizer*"]
+
+[tool.setuptools.dynamic]
+version = { attr = "mwl_phonemizer.version.VERSION_STR" }
