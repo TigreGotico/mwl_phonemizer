@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.1.1a1](https://github.com/TigreGotico/mwl_phonemizer/tree/2.1.1a1) (2026-09-16)
+
+[Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/2.1.0a4...2.1.1a1)
+
+**Merged pull requests:**
+
+- fix: correct the number tables to the attested forms [\#37](https://github.com/TigreGotico/mwl_phonemizer/pull/37) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [2.1.0a4](https://github.com/TigreGotico/mwl_phonemizer/tree/2.1.0a4) (2026-08-02)
 
 [Full Changelog](https://github.com/TigreGotico/mwl_phonemizer/compare/2.1.0a3...2.1.0a4)
